@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ปาจื่อ — Four Pillars Calculator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@500&display=swap');
+
+:root{
+  --ink:#1D1E2C;
+  --ink-rgb:29,30,44;
+  --ink-fixed:#1D1E2C;
+  --slate:#59656F;
+  --lav:#AC9FBB;
+  --pink:#DDBDD5;
+  --cream:#F7EBEC;
+  --cream-rgb:247,235,236;
+  --water: #333850;
+
+  --el-wood:#AC9FBB;
+  --el-fire:#DDBDD5;
+  --el-earth:#F7EBEC;
+  --el-metal:#8B99A3;
+  --el-water:#565F82;
+
+  --line: rgba(var(--cream-rgb),0.14);
+  --line-soft: rgba(var(--cream-rgb),0.07);
+}
+
+body.light-mode{
+  --ink:#F7F2ED;
+  --ink-rgb:247,242,237;
+  --slate:#7C7186;
+  --lav:#9A7FAF;
+  --pink:#C46FA6;
+  --cream:#2B2A3D;
+  --cream-rgb:43,42,61;
+  --water:#E3D9EC;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(172,159,187,0.20), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(221,189,213,0.12), transparent 55%),
+    radial-gradient(ellipse 900px 700px at 50% 120%, rgba(89,101,111,0.35), transparent 60%),
+    var(--ink);
+  color:var(--cream);
+  font-family:'Noto Sans Thai','Inter',sans-serif;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* ambient stars */
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.55;}
+body.light-mode .stars{display:none;}
+.stars span{
+  position:absolute; width:2px;height:2px;border-radius:50%;
+  background:var(--cream); opacity:0.5;
+  animation:twinkle 4s ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.85}}
+
+.wrap{
+  position:relative; z-index:1;
+  max-width:760px; margin:0 auto; padding:56px 20px 90px;
+}
+
+.theme-toggle{
+  position:fixed; top:16px; right:16px; z-index:10;
+  display:flex; align-items:center; gap:7px;
+  padding:6px 10px; border-radius:20px; border:1px solid var(--line);
+  background:rgba(var(--ink-rgb),0.55); backdrop-filter:blur(6px);
+  cursor:pointer; transition:.2s;
+}
+.theme-toggle:hover{border-color:var(--lav);}
+.theme-icon{width:15px; height:15px; flex-shrink:0; color:var(--slate); transition:color .2s;}
+.theme-icon.moon{color:var(--lav);}
+.theme-track{
+  position:relative; width:34px; height:18px; border-radius:10px;
+  background:rgba(var(--cream-rgb),0.14); flex-shrink:0;
+}
+.theme-thumb{
+  position:absolute; top:2px; left:18px; width:14px; height:14px; border-radius:50%;
+  background:var(--lav); transition:left .2s, background .2s;
+}
+body.light-mode .theme-thumb{ left:2px; background:var(--pink); }
+body.light-mode .theme-icon.sun{ color:var(--pink); }
+body.light-mode .theme-icon.moon{ color:var(--slate); }
+
+/* ---------- HERO ---------- */
+.hero{text-align:center; margin-bottom:44px;}
+.hero .eyebrow{
+  font-family:'Cinzel',serif; letter-spacing:.32em; text-transform:uppercase;
+  font-size:11px; color:var(--lav); margin-bottom:14px; opacity:.85;
+}
+.hero h1{
+  font-family:'Noto Serif SC','Cormorant Garamond',serif;
+  font-size:clamp(40px,9vw,64px);
+  margin:0 0 6px; font-weight:500; letter-spacing:.06em;
+  background:linear-gradient(180deg,var(--cream),var(--pink) 120%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero .sub{
+  font-family:'Cormorant Garamond',serif; font-style:italic;
+  font-size:19px; color:var(--cream); opacity:.72; max-width:440px; margin:0 auto;
+}
+.hero .tag{
+  display:inline-block; margin-top:18px; font-size:12.5px; color:var(--slate);
+  background:rgba(var(--cream-rgb),0.05); border:1px solid var(--line);
+  padding:6px 14px; border-radius:20px;
+}
+.hero .tag b{color:var(--pink); font-weight:600;}
+
+/* ---------- CARD ---------- */
+.card{
+  background:linear-gradient(180deg, rgba(var(--cream-rgb),0.045), rgba(var(--cream-rgb),0.015));
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:32px;
+  backdrop-filter:blur(6px);
+  margin-bottom:28px;
+}
+@media(max-width:560px){ .card{padding:22px 18px;} }
+
+.section-label{
+  font-family:'Cinzel',serif; font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--lav); margin:0 0 18px; display:flex; align-items:center; gap:10px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--line);}
+
+/* ---------- FORM ---------- */
+.field-row{display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;}
+.field{flex:1; min-width:90px;}
+.field label{
+  display:block; font-size:12.5px; color:var(--cream); opacity:.6; margin-bottom:7px;
+}
+select, input[type=number]{
+  width:100%; background:rgba(var(--ink-rgb),0.55); border:1px solid var(--line);
+  color:var(--cream); padding:11px 12px; border-radius:10px; font-size:15px;
+  font-family:'Noto Sans Thai',sans-serif; appearance:none; outline:none;
+  transition:border-color .2s, background .2s;
+}
+select:focus, input:focus{border-color:var(--lav); background:rgba(var(--ink-rgb),0.8);}
+select{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%23AC9FBB' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat; background-position:right 12px center; padding-right:30px;
+}
+
+.era-toggle{display:flex; gap:6px; margin-top:7px;}
+.era-toggle button{
+  flex:1; background:rgba(var(--cream-rgb),0.04); border:1px solid var(--line); color:var(--cream);
+  opacity:.55; padding:7px 0; border-radius:8px; font-size:12.5px; cursor:pointer;
+  font-family:'Noto Sans Thai',sans-serif; transition:.2s;
+}
+.era-toggle button.active{opacity:1; border-color:var(--lav); background:rgba(172,159,187,0.14); color:var(--lav);}
+
+.check-row{
+  display:flex; align-items:center; gap:10px; margin:6px 0 22px;
+  font-size:13.5px; color:var(--cream); opacity:.75; cursor:pointer; user-select:none;
+}
+.check-row input{width:16px;height:16px; accent-color:var(--lav); cursor:pointer;}
+
+.time-fields{transition:opacity .25s, max-height .25s; overflow:hidden;}
+.time-fields.hidden{opacity:.25; pointer-events:none;}
+
+.gender-row{display:flex; gap:10px; margin-bottom:22px;}
+.gender-row button{
+  flex:1; padding:11px; border-radius:10px; border:1px solid var(--line);
+  background:rgba(var(--cream-rgb),0.03); color:var(--cream); opacity:.6; cursor:pointer;
+  font-family:'Noto Sans Thai',sans-serif; font-size:14px; transition:.2s;
+}
+.gender-row button.active{opacity:1; border-color:var(--pink); background:rgba(221,189,213,0.12); color:var(--pink);}
+
+.calc-btn{
+  width:100%; padding:16px; border:none; border-radius:12px; cursor:pointer;
+  font-family:'Cinzel',serif; font-size:14px; letter-spacing:.18em; text-transform:uppercase;
+  background:linear-gradient(135deg, var(--lav), var(--pink));
+  color:var(--ink-fixed); font-weight:600;
+  transition:transform .15s, box-shadow .15s;
+  box-shadow:0 8px 24px rgba(172,159,187,0.25);
+}
+.calc-btn:hover{transform:translateY(-1px); box-shadow:0 10px 30px rgba(172,159,187,0.4);}
+.calc-btn:active{transform:translateY(0px);}
+
+.err{
+  color:var(--pink); font-size:13px; background:rgba(221,189,213,0.08);
+  border:1px solid rgba(221,189,213,0.3); padding:10px 14px; border-radius:10px; margin-bottom:16px;
+  display:none;
+}
+
+/* ---------- RESULTS ---------- */
+#results{display:none;}
+#results.show{display:block; animation:riseIn .5s ease both;}
+@keyframes riseIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+
+.pillars{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;
+}
+@media(max-width:520px){ .pillars{grid-template-columns:repeat(2,1fr); gap:10px;} }
+
+.pillar{
+  border:1px solid var(--line); border-radius:16px; padding:18px 8px 16px;
+  text-align:center; position:relative; overflow:hidden;
+  background:rgba(var(--ink-rgb),0.35);
+}
+.pillar .plabel{
+  font-family:'Cinzel',serif; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--slate); margin-bottom:14px;
+}
+.pillar .glyphs{display:flex; flex-direction:column; gap:8px; align-items:center; margin-bottom:12px;}
+.glyph{
+  width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-family:'Noto Serif SC',serif; font-size:28px; font-weight:500;
+  border:1px solid var(--line);
+}
+.pillar .pname{font-size:11.5px; color:var(--cream); opacity:.65; line-height:1.5;}
+.pillar .pname b{color:var(--cream); opacity:1; font-weight:600;}
+.pillar.daymaster{border-color:var(--pink); box-shadow:0 0 0 1px rgba(221,189,213,0.35), 0 10px 30px rgba(221,189,213,0.12);}
+.dm-badge{
+  position:absolute; top:8px; right:8px; font-size:8.5px; font-family:'Cinzel',serif;
+  letter-spacing:.1em; background:var(--pink); color:var(--ink-fixed); padding:3px 6px; border-radius:6px;
+  text-transform:uppercase; font-weight:600;
+}
+
+.unknown-note{
+  text-align:center; font-size:12px; color:var(--slate); margin:10px 0 26px; font-style:italic;
+}
+
+/* Day master summary */
+.dm-summary{display:flex; gap:20px; align-items:center; margin-bottom:22px; flex-wrap:wrap;}
+.dm-circle{
+  width:88px; height:88px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  border:2px solid var(--line); position:relative;
+}
+.dm-circle .el-char{font-family:'Noto Serif SC',serif; font-size:26px;}
+.dm-circle .el-name{font-size:10px; margin-top:2px; opacity:.75;}
+.dm-text{flex:1; min-width:200px;}
+.dm-text .strength{
+  font-family:'Cormorant Garamond',serif; font-size:24px; font-style:italic; margin-bottom:4px;
+}
+.dm-text .strength b{font-style:normal; font-weight:600;}
+.dm-text p{font-size:13px; color:var(--cream); opacity:.65; margin:0; line-height:1.6;}
+
+.balance-bar{display:flex; height:10px; border-radius:6px; overflow:hidden; margin:16px 0 8px; border:1px solid var(--line);}
+.balance-bar div{height:100%;}
+.balance-legend{display:flex; justify-content:space-between; font-size:10.5px; color:var(--slate); flex-wrap:wrap; gap:6px;}
+.balance-legend span{display:flex; align-items:center; gap:5px;}
+.balance-legend i{width:8px;height:8px;border-radius:50%; display:inline-block;}
+
+/* useful god pills */
+.useful-wrap{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px;}
+.useful-pill{
+  flex:1; min-width:150px; border:1px solid var(--line); border-radius:14px; padding:16px;
+  background:rgba(var(--cream-rgb),0.03);
+}
+.useful-pill .uhead{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.useful-pill .udot{width:22px;height:22px;border-radius:50%; border:1px solid var(--line); flex-shrink:0;}
+.useful-pill .uname{font-family:'Cormorant Garamond',serif; font-size:19px; font-style:italic;}
+.useful-pill p{font-size:12px; color:var(--cream); opacity:.65; margin:0; line-height:1.6;}
+
+.caveat{
+  font-size:11.5px; color:var(--slate); line-height:1.8; border-top:1px solid var(--line-soft);
+  margin-top:26px; padding-top:18px;
+}
+.caveat b{color:var(--cream); opacity:.7;}
+
+/* ---------- Explore / topic buttons ---------- */
+.explore-intro{font-size:13px; color:var(--cream); opacity:.6; margin-bottom:18px;}
+.topic-grid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;}
+.topic-btn{
+  padding:10px 18px; border-radius:24px; border:1px solid var(--line);
+  background:rgba(var(--cream-rgb),0.04); color:var(--cream); opacity:.68; cursor:pointer;
+  font-family:'Noto Sans Thai',sans-serif; font-size:13.5px; transition:.2s;
+}
+.topic-btn:hover{opacity:.9; border-color:var(--lav);}
+.topic-btn.active{
+  opacity:1; color:var(--ink-fixed); border-color:transparent;
+  background:linear-gradient(135deg, var(--lav), var(--pink));
+  font-weight:600;
+}
+
+.reading-panel{
+  display:none; margin-top:20px; padding-top:20px; border-top:1px solid var(--line-soft);
+  animation:riseIn .35s ease both;
+}
+.reading-panel.show{display:block;}
+.reading-panel .rp-head{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+.reading-panel .rp-dot{width:26px;height:26px;border-radius:50%; flex-shrink:0; border:1px solid var(--line);}
+.reading-panel .rp-title{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:21px;}
+.reading-panel .rp-level{
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate);
+  border:1px solid var(--line); border-radius:10px; padding:2px 9px; margin-left:auto;
+}
+.reading-panel p{font-size:13.5px; line-height:1.85; color:var(--cream); opacity:.8; margin:0;}
+
+.dir-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
+.dir-col-head{
+  font-family:'Cinzel',serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--line-soft);
+}
+.dir-col-head.good{color:#8fd19e;}
+.dir-col-head.bad{color:#e08a8a;}
+.dir-row{display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--line-soft);}
+.dir-row:last-child{border-bottom:none;}
+.dir-name{color:var(--cream); opacity:.6;}
+.dir-val{color:var(--cream); font-weight:500;}
+
+.decade-nav{display:flex; gap:10px; margin-top:18px;}
+.decade-nav-btn{
+  flex:1; padding:10px; border-radius:10px; border:1px solid var(--line);
+  background:rgba(var(--cream-rgb),0.04); color:var(--cream); cursor:pointer;
+  font-family:'Noto Sans Thai',sans-serif; font-size:13px; transition:.2s;
+}
+.decade-nav-btn:hover:not(:disabled){border-color:var(--lav); background:rgba(172,159,187,0.12);}
+.decade-nav-btn:disabled{opacity:.25; cursor:default;}
+
+.decade-strip{
+  display:none; gap:8px; overflow-x:auto; margin-top:18px; padding-top:18px;
+  border-top:1px solid var(--line-soft); padding-bottom:4px;
+}
+.decade-strip.show{display:flex;}
+.decade-chip{
+  flex-shrink:0; min-width:78px; text-align:center; padding:12px 10px; border-radius:12px;
+  border:1px solid var(--line); background:rgba(var(--cream-rgb),0.03); cursor:pointer; transition:.2s;
+}
+.decade-chip:hover{border-color:var(--lav);}
+.decade-chip.active{border-color:var(--pink); background:rgba(221,189,213,0.12);}
+.decade-chip.past{opacity:.4;}
+.decade-chip.past:hover{opacity:.7;}
+.decade-chip.past.active{opacity:1;}
+.decade-chip .dc-age{font-size:11px; color:var(--slate); margin-bottom:6px;}
+.decade-chip .dc-glyph{font-family:'Noto Serif SC',serif; font-size:17px; line-height:1.3;}
+.decade-chip.current{position:relative;}
+.decade-chip.current::after{
+  content:'ตอนนี้'; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+  background:var(--pink); color:var(--ink-fixed); font-size:9px; padding:1px 7px; border-radius:8px;
+  font-family:'Cinzel',serif; letter-spacing:.06em;
+}
+.decade-caption{
+  font-size:11.5px; color:var(--slate); line-height:1.7; margin-top:12px; font-style:italic;
+  font-family:'Cormorant Garamond',serif;
+}
+
+/* ---------- Daily fortune calendar ---------- */
+.cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.cal-nav-btn{
+  width:34px; height:34px; border-radius:10px; border:1px solid var(--line);
+  background:rgba(var(--cream-rgb),0.04); color:var(--cream); cursor:pointer; font-size:13px;
+}
+.cal-nav-btn:hover{border-color:var(--lav);}
+.cal-month-label{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:19px;}
+.cal-weekdays{
+  display:grid; grid-template-columns:repeat(7,1fr); text-align:center;
+  font-size:10.5px; color:var(--slate); margin-bottom:6px;
+}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+.cal-cell{
+  aspect-ratio:1; border-radius:9px; border:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; font-size:12px; color:var(--cream); position:relative; transition:.15s;
+  background:rgba(var(--cream-rgb),0.02);
+}
+.cal-cell.empty{visibility:hidden; cursor:default;}
+.cal-cell:hover{border-color:var(--lav);}
+.cal-cell.selected{border-color:var(--pink) !important; background:rgba(221,189,213,0.22) !important; box-shadow:0 0 0 1px var(--pink);}
+.cal-cell.today{font-weight:700;}
+.cal-cell.q-good{background:rgba(143,209,158,0.16); border-color:rgba(143,209,158,0.4);}
+.cal-cell.q-mid{background:rgba(172,159,187,0.14); border-color:rgba(172,159,187,0.4);}
+.cal-cell.q-low{background:rgba(224,138,138,0.16); border-color:rgba(224,138,138,0.45);}
+.cal-cell .cq-dot{width:9px; height:9px; border-radius:50%; margin-top:4px; box-shadow:0 0 4px currentColor;}
+.cal-dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px;}
+.cal-dot.good{background:#8fd19e;}
+.cal-dot.mid{background:var(--lav);}
+.cal-dot.low{background:#e08a8a;}
+.cq-dot.good{background:#8fd19e; color:#8fd19e;}
+.cq-dot.mid{background:var(--lav); color:var(--lav);}
+.cq-dot.low{background:#e08a8a; color:#e08a8a;}
+.cal-legend{display:flex; gap:16px; margin-top:12px; font-size:11px; color:var(--slate); align-items:center;}
+
+.cal-detail{margin-top:20px; padding-top:20px; border-top:1px solid var(--line-soft); animation:riseIn .3s ease both;}
+.cal-detail .cd-head{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+.cal-detail .cd-score{
+  font-family:'Cormorant Garamond',serif; font-size:32px; font-style:italic; line-height:1;
+}
+.cal-detail .cd-score span{font-size:14px; opacity:.5; font-style:normal;}
+.cd-reason{font-size:13px; line-height:1.75; color:var(--cream); opacity:.78; margin:0 0 18px;}
+
+/* ---------- dual gauge rings (universal vs personal) ---------- */
+.gauge-wrap{display:flex; gap:18px; margin-bottom:20px; text-align:center;}
+.gauge{flex:1;}
+.gauge-title{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:12px; color:var(--slate); margin-bottom:12px;
+}
+.gauge-title svg{width:13px; height:13px; flex-shrink:0;}
+.gauge-circle{
+  width:92px; height:92px; border-radius:50%; margin:0 auto 10px; position:relative;
+  background:conic-gradient(var(--gauge-color,var(--pink)) calc(var(--pct)*1%), rgba(var(--cream-rgb),0.10) 0);
+}
+.gauge-circle::before{
+  content:''; position:absolute; inset:9px; border-radius:50%; background:var(--ink);
+}
+.gauge-inner{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+.gauge-score{font-family:'Cormorant Garamond',serif; font-size:24px; font-style:italic; color:var(--cream); line-height:1;}
+.gauge-score span{font-size:10px; opacity:.5; font-style:normal; display:block; margin-top:1px;}
+.gauge-label{font-size:12.5px; color:var(--cream); opacity:.85; margin-top:2px;}
+.gauge-caption{font-size:10.5px; color:var(--slate); text-align:center; margin-bottom:20px; line-height:1.6;}
+.cd-reason b{color:var(--pink); font-weight:600; opacity:1;}
+.cal-detail .cd-label{font-size:12.5px; color:var(--slate);}
+.cd-bars{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
+.cd-bar-row{display:flex; align-items:center; gap:10px;}
+.cd-bar-name{width:64px; font-size:12px; color:var(--cream); opacity:.7; flex-shrink:0;}
+.cd-bar-track{flex:1; height:7px; border-radius:5px; background:rgba(var(--cream-rgb),0.08); overflow:hidden;}
+.cd-bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,var(--lav),var(--pink));}
+.cd-grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.cd-tile{border:1px solid var(--line); border-radius:12px; padding:12px; background:rgba(var(--cream-rgb),0.03);}
+.cd-tile .cd-tile-label{font-size:10.5px; color:var(--slate); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+.cd-tile .cd-tile-value{font-size:13.5px; color:var(--cream); display:flex; align-items:center; gap:8px;}
+.cd-swatch{width:16px;height:16px;border-radius:50%; border:1px solid var(--line); flex-shrink:0;}
+
+footer{text-align:center; font-size:11px; color:var(--slate); margin-top:36px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="wrap">
+
+  <button type="button" id="themeToggleBtn" class="theme-toggle" aria-label="Toggle theme">
+    <svg class="theme-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2"/>
+      <line x1="12" y1="2.5" x2="12" y2="5"/>
+      <line x1="12" y1="19" x2="12" y2="21.5"/>
+      <line x1="2.5" y1="12" x2="5" y2="12"/>
+      <line x1="19" y1="12" x2="21.5" y2="12"/>
+      <line x1="4.9" y1="4.9" x2="6.6" y2="6.6"/>
+      <line x1="17.4" y1="17.4" x2="19.1" y2="19.1"/>
+      <line x1="4.9" y1="19.1" x2="6.6" y2="17.4"/>
+      <line x1="17.4" y1="6.6" x2="19.1" y2="4.9"/>
+    </svg>
+    <div class="theme-track"><div class="theme-thumb" id="themeThumb"></div></div>
+    <svg class="theme-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
+    </svg>
+  </button>
+
+  <div class="hero">
+    <div class="eyebrow">Four Pillars of Destiny</div>
+    <h1>ปาจื่อ 八字</h1>
+    <div class="sub">คำนวณผังดวงสี่เสาจากวัน เดือน ปี เวลาเกิด</div>
+    <div class="tag">Prototype · <b>ทดสอบความแม่นยำ</b> · v1</div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="section-label">ข้อมูลวันเกิด</div>
+
+    <div class="field-row">
+      <div class="field" style="flex:1.4">
+        <label>ปีเกิด</label>
+        <input type="number" id="yearInput" placeholder="เช่น 1990" />
+        <div class="era-toggle">
+          <button type="button" id="btnCE" class="active">ค.ศ.</button>
+          <button type="button" id="btnBE">พ.ศ.</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>เดือน</label>
+        <select id="monthInput"></select>
+      </div>
+      <div class="field">
+        <label>วันที่</label>
+        <select id="dayInput"></select>
+      </div>
+    </div>
+
+    <label class="check-row">
+      <input type="checkbox" id="unknownTime" />
+      ไม่ทราบเวลาเกิด (จะไม่แสดงเสาเวลา)
+    </label>
+
+    <div class="field-row time-fields" id="timeFields">
+      <div class="field">
+        <label>ชั่วโมง (24 ชม.)</label>
+        <select id="hourInput"></select>
+      </div>
+      <div class="field">
+        <label>นาที</label>
+        <select id="minuteInput"></select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:22px;">
+      <label>เพศ (ใช้คำนวณทิศทางดวงช่วงชีวิต)</label>
+      <div class="gender-row">
+        <button type="button" id="btnMale">ชาย</button>
+        <button type="button" id="btnFemale">หญิง</button>
+      </div>
+    </div>
+
+    <div class="err" id="errBox"></div>
+
+    <button class="calc-btn" id="calcBtn">คำนวณดวงปาจื่อ</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <div class="card">
+      <div class="section-label">สี่เสาแห่งโชคชะตา · Four Pillars</div>
+      <div class="pillars" id="pillarsGrid"></div>
+      <div class="unknown-note" id="unknownNote" style="display:none;">* ไม่ระบุเวลาเกิด — แสดงเฉพาะ 3 เสา (ปี / เดือน / วัน)</div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">ธาตุประจำตัว · Day Master</div>
+      <div class="dm-summary" id="dmSummary"></div>
+      <div class="balance-bar" id="balanceBar"></div>
+      <div class="balance-legend" id="balanceLegend"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">ธาตุให้คุณ · Useful God</div>
+      <div class="useful-wrap" id="usefulWrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">ทิศมงคลประจำตัว · Kua Number</div>
+      <div id="directionPanel"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">สำรวจดวงของคุณ · Explore Your Chart</div>
+      <div class="explore-intro">เลือกหัวข้อที่อยากรู้ แล้วดูคำแนะนำที่ตีความจากผังของคุณโดยเฉพาะ</div>
+      <div class="topic-grid" id="topicGrid"></div>
+      <div class="reading-panel" id="readingPanel"></div>
+      <div class="decade-strip" id="decadeStrip" style="display:none;"></div>
+      <div class="decade-caption" id="decadeCaption" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">ปฏิทินมงคลรายวัน · Daily Fortune Calendar</div>
+      <div class="cal-header">
+        <button type="button" class="cal-nav-btn" id="calPrevBtn">◀</button>
+        <div class="cal-month-label" id="calMonthLabel"></div>
+        <button type="button" class="cal-nav-btn" id="calNextBtn">▶</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><i class="cal-dot good"></i>ดี</span>
+        <span><i class="cal-dot mid"></i>ปานกลาง</span>
+        <span><i class="cal-dot low"></i>ควรระวัง</span>
+      </div>
+      <div class="cal-detail" id="calDetail" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="caveat">
+        <b>หมายเหตุความแม่นยำ:</b> เสาปี/เดือน/วัน/เวลา คำนวณจากตำแหน่งสุริยคติจริง (24 節氣) ครอบคลุมปี ค.ศ. 1900–2035 ผลลัพธ์แม่นยำระดับวัน — หากเกิดในช่วง ±1 วันของรอยต่อฤดูกาล (เช่น วันตัดปีที่立春 หรือวันตัดเดือน) เสาที่เกี่ยวข้องอาจคลาดเคลื่อนได้เล็กน้อย เวลาเกิดใช้เป็นเวลานาฬิกาท้องถิ่นตรงๆ ยังไม่ปรับ true solar time ตามลองจิจูด<br>
+        <b>เรื่อง "แข็ง/อ่อน" และ "ธาตุให้คุณ":</b> เป็นการประเมินแบบย่อ (นับน้ำหนักธาตุ 7 ตัวอักษร ให้เสาเดือนมีน้ำหนักคูณสอง) ใช้เป็นแนวทางเบื้องต้น ไม่ใช่การตีความแบบมืออาชีพที่พิจารณาปฏิสัมพันธ์ระหว่างเสาแบบละเอียด (合/沖/刑/害 ฯลฯ)<br>
+        <b>เรื่องดวงช่วงชีวิต (10 ปี):</b> อายุเริ่มดวงแรกคำนวณจากระยะห่างวันเกิดถึงวันตัดฤดูกาลถัดไป/ก่อนหน้า (หลักการ 3 วัน = 1 ปี) เป็นค่าประมาณ ทิศทางเดินดวงอิงจากขั้วธาตุปีเกิดและเพศตามหลักปาจื่อดั้งเดิม<br>
+        <b>เรื่องปฏิทินมงคลรายวัน:</b> คะแนน/สี/ทิศ คำนวณจากความสัมพันธ์ธาตุระหว่างวันนั้นกับ Day Master ของคุณ (ระบบ十神 แบบย่อ) ส่วนนักษัตรที่ถูกโฉลก/ต้องเลี่ยง อิงหลัก六合/六沖 (คู่ประสาน/คู่ปะทะ) ตามตำราจีนดั้งเดิม เป็นแนวทางเบื้องต้น ไม่ใช่การคำนวณฤกษ์ยามแบบมืออาชีพที่พิจารณาปัจจัยอื่นร่วมด้วย<br>
+        <b>เรื่องทิศมงคล (เลขกวย้า):</b> คำนวณตามสูตรมาตรฐาน 命卦/八宅 (Kua Number / Eight Mansions) ตรวจสอบสูตรและตารางทิศแล้วกับแหล่งอ้างอิงหลายแห่ง ปีเกิดที่ใช้คำนวณอิงตามวันตัด立春 (เดียวกับที่ใช้คำนวณเสาปีทั้งหมดในแอพนี้) ซึ่งบางตำราใช้วันตรุษจีน (คนละวันกับ立春) แทน — ถ้าเกิดในช่วงปลายมกราคม-ต้นกุมภาพันธ์ อาจได้เลขกวย้าต่างจากเว็บอื่นที่ใช้เกณฑ์ต่างกัน<br>
+        <b>เรื่องคะแนน "สากล":</b> ใช้ระบบ十二建除 (สิบสองผู้พิทักษ์วัน) ซึ่งเป็นระบบดั้งเดิมในปฏิทินจีนที่ไม่ผูกกับดวงของใครคนใดคนหนึ่ง คำนวณจากความสัมพันธ์ระหว่างกิ่งดินของวันกับเดือน ในรอบเดือนจริงบางครั้งจะมีวัน "ซ้ำ" ผู้พิทักษ์เดิม (双建) ตรงรอยต่อฤดูกาล ซึ่งแอพนี้ยังไม่ได้จัดการกรณีนี้แบบเต็มรูปแบบ ส่วนการแปลงเป็นคะแนน /100 เป็นการประมาณเชิงกลุ่ม (ดี/กลาง/ควรระวัง) ไม่ใช่คะแนนที่ตำราดั้งเดิมกำหนดไว้ตรงๆ
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Built for testing · not for production reading</footer>
+</div>
+
+<script>
+/* ============ DATA: verified against astronomical ephemeris (sxtwl) ============ */
+const JIE_START=1900,JIE_END=2035;
+const JIE_TABLE=[[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,908,1009,1108,1208],[106,205,307,406,507,607,708,809,909,1009,1108,1208],[107,205,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,606,708,808,908,1009,1108,1208],[106,205,307,406,507,607,708,809,909,1009,1108,1208],[107,205,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,606,708,808,908,1009,1108,1208],[106,205,307,406,507,607,708,809,909,1009,1108,1208],[107,205,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,909,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,909,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,909,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,909,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,607,708,808,908,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,606,708,808,908,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,606,708,808,908,1009,1108,1208],[106,205,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,306,406,506,606,708,808,908,1009,1108,1208],[106,205,306,405,505,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,606,707,807,908,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,606,707,807,908,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,606,707,807,908,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,606,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,606,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,404,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,205,305,404,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,708,808,908,1009,1108,1208],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,606,707,807,908,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,606,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,606,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1009,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,404,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207],[106,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,305,404,505,605,707,807,907,1008,1107,1207],[105,203,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,606,707,807,908,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,305,404,505,605,706,807,907,1008,1107,1207],[105,203,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,606,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1108,1207],[106,204,305,404,505,605,706,807,907,1008,1107,1206],[105,203,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,305,404,505,605,706,807,907,1008,1107,1206],[105,203,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,506,606,707,808,908,1008,1107,1207],[106,204,305,404,505,605,706,807,907,1008,1107,1206],[105,203,305,404,505,605,707,807,907,1008,1107,1207],[105,204,305,405,505,605,707,807,907,1008,1107,1207],[105,204,306,405,505,606,707,807,908,1008,1107,1207]];
+const LICHUN_TABLE=[204,204,205,205,205,204,205,205,205,204,205,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,205,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,205,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,203,204,204,204,203,204,204,204,203,204,204,204,203,204,204,204,203,204,204];
+
+/* ============ Bazi core (verified against astronomical library) ============ */
+const STEMS = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const BRANCHES = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const STEM_TH = ["เจี่ย","อี่","ปิ่ง","ติง","อู้","จี่","เกิง","ซิน","หยิ๋น","กุ่ย"];
+const BRANCH_TH = ["ชวด (หนู)","ฉลู (วัว)","ขาล (เสือ)","เถาะ (กระต่าย)","มะโรง (มังกร)","มะเส็ง (งู)","มะเมีย (ม้า)","มะแม (แพะ)","วอก (ลิง)","ระกา (ไก่)","จอ (หมา)","กุน (หมู)"];
+const STEM_ELEM = [0,0,1,1,2,2,3,3,4,4];              // wood,wood,fire,fire,earth,earth,metal,metal,water,water
+const BRANCH_ELEM = [4,2,0,0,2,1,1,2,3,3,2,4];         // 子丑寅卯辰巳午未申酉戌亥
+const ELEM_NAME = ["ไม้","ไฟ","ดิน","ทอง","น้ำ"];
+const ELEM_CHAR = ["木","火","土","金","水"];
+const ELEM_COLOR = ["var(--el-wood)","var(--el-fire)","var(--el-earth)","var(--el-metal)","var(--el-water)"];
+const ELEM_TEXTC = ["#1D1E2C","#1D1E2C","#1D1E2C","#F7EBEC","#F7EBEC"];
+const ELEM_TIP = [
+  "สีเขียว มิ้นต์ ฟ้าอมเขียว · ทิศตะวันออก · การเติบโต การเริ่มต้นใหม่",
+  "สีแดง ส้ม ชมพูสด · ทิศใต้ · พลังงาน แรงขับเคลื่อน การแสดงออก",
+  "สีครีม เหลืองทอง น้ำตาลอ่อน · ศูนย์กลาง/สี่มุมเมือง · ความมั่นคง ความน่าเชื่อถือ",
+  "สีขาว เงิน เทา · ทิศตะวันตก · วินัย โครงสร้าง การตัดสินใจ",
+  "สีน้ำเงินเข้ม ดำ · ทิศเหนือ · สติปัญญา การพักผ่อน ความยืดหยุ่น"
+];
+/* real-world hex swatches per element (independent of the app's pastel theme palette) */
+const ELEM_REAL_COLOR = ["#4CAF6D","#E4572E","#C9A227","#B8BEC7","#1B2A4A"];
+function elemColorLabel(e){ return ELEM_TIP[e].split('·')[0].trim(); }
+
+function isLeap(y){ return (y%4===0 && y%100!==0) || y%400===0; }
+function jdn(y,m,d){
+  const a = Math.floor((14-m)/12);
+  const y2 = y+4800-a, m2 = m+12*a-3;
+  return d + Math.floor((153*m2+2)/5) + 365*y2 + Math.floor(y2/4) - Math.floor(y2/100) + Math.floor(y2/400) - 32045;
+}
+function mod(n,m){ return ((n%m)+m)%m; }
+
+function jieRow(y){ return JIE_TABLE[y-JIE_START]; }
+
+function monthBranch(y,m,d){
+  const mmdd = m*100+d;
+  const row = jieRow(y);
+  if(mmdd < row[0] || mmdd >= row[11]) return 0;
+  const bmap = [1,2,3,4,5,6,7,8,9,10,11];
+  for(let i=0;i<11;i++){ if(row[i]<=mmdd && mmdd<row[i+1]) return bmap[i]; }
+  return 0;
+}
+function baziYear(y,m,d){
+  const l = LICHUN_TABLE[y-JIE_START];
+  const mmdd = m*100+d;
+  return mmdd < l ? y-1 : y;
+}
+
+function calcBazi(y,m,d,h,mi,hasTime){
+  const j = jdn(y,m,d);
+  const dStem = mod(j+9,10), dBranch = mod(j+1,12);
+
+  const by = baziYear(y,m,d);
+  const yStem = mod(by-4,10), yBranch = mod(by-4,12);
+
+  const mBranch = monthBranch(y,m,d);
+  const yinStems = [2,4,6,8,0];
+  const yinStem = yinStems[mod(yStem,5)];
+  const steps = mod(mBranch-2,12);
+  const mStem = mod(yinStem+steps,10);
+
+  let hStem=null, hBranch=null;
+  if(hasTime){
+    hBranch = Math.floor(mod(h+1,24)/2);
+    const effDStem = (h===23) ? mod(dStem+1,10) : dStem;
+    const ziStems = [0,2,4,6,8];
+    const ziStem = ziStems[mod(effDStem,5)];
+    hStem = mod(ziStem+hBranch,10);
+  }
+
+  return {
+    year:{stem:yStem, branch:yBranch},
+    month:{stem:mStem, branch:mBranch},
+    day:{stem:dStem, branch:dBranch},
+    hour: hasTime ? {stem:hStem, branch:hBranch} : null
+  };
+}
+
+/* element cycle helpers (0 wood,1 fire,2 earth,3 metal,4 water) */
+function generatorOf(e){ return mod(e-1,5); }   // element that produces e
+function drainOf(e){ return mod(e+1,5); }       // element e produces (食傷)
+function wealthOf(e){ return mod(e+2,5); }      // element e controls (財)
+function controllerOf(e){ return mod(e+3,5); }  // element that controls e (官殺)
+
+/* relation of "other" element to Day Master element -> 0 peer,1 output,2 wealth,3 authority,4 resource */
+function relationOf(dmElem, otherElem){
+  if(otherElem===dmElem) return 0;
+  if(otherElem===drainOf(dmElem)) return 1;
+  if(otherElem===wealthOf(dmElem)) return 2;
+  if(otherElem===controllerOf(dmElem)) return 3;
+  return 4; // generatorOf(dmElem)
+}
+
+/* Ten-God-style index (0-9): relation(0-4) x polarity match(0=same,1=opposite) — mirrors traditional 十神 distinctions
+   e.g. peer+same=比肩, peer+opposite=劫財, output+same=食神, output+opposite=傷官, etc. */
+function tenGodIndex(dmStem, dmElem, otherStem, otherElem){
+  const rel = relationOf(dmElem, otherElem);
+  const samePolarity = (dmStem%2) === (otherStem%2);
+  return rel*2 + (samePolarity ? 0 : 1);
+}
+
+/* ---------- Luck Pillars (大運, 10-year cycles) ---------- */
+function jieqiJDNsForYear(y){
+  if(y<JIE_START || y>JIE_END) return [];
+  return jieRow(y).map(mmdd => jdn(y, Math.floor(mmdd/100), mmdd%100));
+}
+function findAdjacentJieJDN(y,m,d, forward){
+  const birthJDN = jdn(y,m,d);
+  let candidates = [];
+  for(let yy=y-1; yy<=y+1; yy++){ candidates = candidates.concat(jieqiJDNsForYear(yy)); }
+  candidates.sort((a,b)=>a-b);
+  if(forward){
+    for(const c of candidates){ if(c>birthJDN) return c; }
+    return candidates[candidates.length-1];
+  } else {
+    for(let i=candidates.length-1;i>=0;i--){ if(candidates[i]<=birthJDN) return candidates[i]; }
+    return candidates[0];
+  }
+}
+function luckDirectionIsForward(yStem, isMale){
+  const yang = (yStem%2===0);
+  return (yang===isMale);
+}
+function buildLuckPillars(y,m,d, monthStem, monthBranch, yStem, isMale, count){
+  const forward = luckDirectionIsForward(yStem, isMale);
+  const birthJDN = jdn(y,m,d);
+  const edgeJDN = findAdjacentJieJDN(y,m,d,forward);
+  const days = Math.abs(edgeJDN - birthJDN);
+  const startAge = days/3;
+  const arr=[];
+  let s=monthStem, b=monthBranch;
+  for(let i=0;i<count;i++){
+    s = forward ? mod(s+1,10) : mod(s-1,10);
+    b = forward ? mod(b+1,12) : mod(b-1,12);
+    arr.push({stem:s, branch:b, startAge: startAge + i*10, endAge: startAge + (i+1)*10});
+  }
+  return {forward, startAge, pillars:arr};
+}
+
+/* ---------- Kua Number (命卦) & Eight Mansions (八宅) directions ---------- */
+/* Verified formula against documented worked examples (yourchineseastrology.com):
+   male born 1/16/1982, pre-CNY -> uses year 1981 -> Kua 1; male born 1960 -> Kua 4. */
+function digitReduce(n){ while(n>=10){ n = String(n).split('').reduce((a,c)=>a+parseInt(c),0); } return n; }
+
+function calcKua(baziYearForKua, isMale){
+  let last2 = baziYearForKua % 100;
+  let s = Math.floor(last2/10) + (last2%10);
+  if(s===0) s=10;
+  const d = digitReduce(s);
+  let k;
+  if(isMale){
+    k = (baziYearForKua < 2000) ? (10-d) : (9-d);
+    if(k===0) k=9;
+  } else {
+    k = (baziYearForKua < 2000) ? (d+5) : (d+6);
+    k = digitReduce(k);
+  }
+  if(k===5) k = isMale ? 2 : 8;
+  return k;
+}
+
+const DIR_TH = { N:'เหนือ', NE:'ตะวันออกเฉียงเหนือ', E:'ตะวันออก', SE:'ตะวันออกเฉียงใต้', S:'ใต้', SW:'ตะวันตกเฉียงใต้', W:'ตะวันตก', NW:'ตะวันตกเฉียงเหนือ' };
+/* Verified Eight Mansions (Ba Zhai) direction table, cross-checked against yourchineseastrology.com */
+const KUA_TABLE = {
+  1:{group:'East', success:'SE', health:'E',  love:'S',  growth:'N',  badluck:'W',  fiveghosts:'NE', sixkilling:'NW', totalloss:'SW'},
+  2:{group:'West', success:'NE', health:'W',  love:'NW', growth:'SW', badluck:'E',  fiveghosts:'SE', sixkilling:'S',  totalloss:'N'},
+  3:{group:'East', success:'S',  health:'N',  love:'SE', growth:'E',  badluck:'SW', fiveghosts:'NW', sixkilling:'NE', totalloss:'W'},
+  4:{group:'East', success:'N',  health:'S',  love:'E',  growth:'SE', badluck:'NW', fiveghosts:'SW', sixkilling:'W',  totalloss:'NE'},
+  6:{group:'West', success:'W',  health:'NE', love:'SW', growth:'NW', badluck:'SE', fiveghosts:'E',  sixkilling:'N',  totalloss:'S'},
+  7:{group:'West', success:'NW', health:'SW', love:'NE', growth:'W',  badluck:'N',  fiveghosts:'S',  sixkilling:'SE', totalloss:'E'},
+  8:{group:'West', success:'SW', health:'NW', love:'W',  growth:'NE', badluck:'S',  fiveghosts:'N',  sixkilling:'E',  totalloss:'SE'},
+  9:{group:'East', success:'E',  health:'SE', love:'N',  growth:'S',  badluck:'NE', fiveghosts:'W',  sixkilling:'SW', totalloss:'NW'}
+};
+
+/* ============ Content library (no emoji, plain readable Thai) ============ */
+const PERSONALITY_CORE = [
+  "ธาตุไม้ในตัวคุณคือแรงผลักที่มองไม่เห็นแต่รู้สึกได้เสมอ เหมือนรากไม้ที่ค่อยๆ ดันดินให้แตกออกทีละน้อยโดยไม่มีใครทันสังเกต คุณมองเห็นภาพใหญ่ก่อนคนอื่น วางแผนระยะยาวได้โดยสัญชาตญาณ และมีความยืดหยุ่นมากพอที่จะโอนตัวตามลมแรงโดยไม่หักกลาง แต่เมื่อปักหลักในทิศทางใดแล้ว คุณก็ยึดมั่นอย่างเงียบๆ จนบางครั้งลืมมองว่าโลกรอบตัวเปลี่ยนไปแล้ว และพลาดจังหวะปรับตัวที่ควรทำตั้งแต่เนิ่นๆ",
+  "ธาตุไฟในตัวคุณคือแสงที่จุดติดง่ายและส่องไกล เมื่อคุณเชื่อในสิ่งใดสักอย่าง พลังงานนั้นจะแผ่ออกมาชัดจนคนรอบข้างรู้สึกได้โดยไม่ต้องอธิบาย คุณกล้าแสดงออก พูดตรงไปตรงมา และมักเป็นคนที่จุดประกายให้ทีมเดินหน้าต่อได้ในวันที่ทุกคนหมดไฟ แต่ไฟที่ลุกแรงก็มอดเร็วเช่นกัน หากไม่รู้จักถอยมาเติมเชื้อให้ตัวเองบ้าง ความกระตือรือร้นที่เคยเป็นจุดแข็งอาจกลายเป็นความเหนื่อยล้าที่สะสมอยู่ข้างในโดยไม่รู้ตัว",
+  "ธาตุดินในตัวคุณคือพื้นที่มั่นคงที่คนอื่นเลือกเดินผ่านโดยไม่ลังเล คุณทำงานสม่ำเสมอ ไม่โอ้อวด แต่ทุกคนรู้ดีว่าเมื่อฝากอะไรไว้กับคุณแล้วจะไม่มีวันสูญหาย ความน่าเชื่อถือแบบนี้สร้างขึ้นจากความอดทนที่สะสมมาทีละก้าว ไม่ใช่พรสวรรค์ที่ได้มาในชั่วข้ามคืน แต่ความมั่นคงนั้นก็มาพร้อมความช้า เมื่อถึงจุดที่ต้องตัดสินใจเร็ว คุณมักลังเลนานเกินไปเพราะกลัวว่าการเปลี่ยนแปลงจะสั่นคลอนสิ่งที่สร้างมา",
+  "ธาตุทองในตัวคุณคือคมมีดที่ตัดได้แม่นและเที่ยงตรง คุณมีหลักการของตัวเองชัดเจน ไม่ปล่อยให้อารมณ์มาบดบังการตัดสินใจ และรักษาคำพูดของตัวเองอย่างเคร่งครัดจนคนรอบข้างมองว่าคุณเป็นคนที่พึ่งพาได้ในสถานการณ์ที่ต้องการความชัดเจนที่สุด แต่ความคมนั้นก็บาดได้เช่นกัน เมื่อคุณยึดกฎเกณฑ์แน่นเกินไป บางครั้งก็ตัดโอกาสที่ควรจะยืดหยุ่นทิ้งไปโดยไม่ทันรู้ตัว",
+  "ธาตุน้ำในตัวคุณคือกระแสที่ไหลไปทุกที่โดยไม่มีอะไรกักขังไว้ได้นาน คุณมองเห็นหลายมุมมองพร้อมกัน ปรับตัวเข้ากับสถานการณ์ใหม่ได้เร็วกว่าคนทั่วไป และมักหาทางออกที่คนอื่นมองข้ามไปเจอได้เสมอ แต่ความลื่นไหลนั้นก็มีราคาที่ต้องจ่าย เมื่อทุกอย่างไหลได้ตลอดเวลา บางครั้งคุณเองก็ไม่แน่ใจว่าจุดยืนที่แท้จริงของตัวเองอยู่ตรงไหนกันแน่"
+];
+const STRENGTH_NOTE = {
+  strong: "และเพราะธาตุประจำตัวของคุณค่อนข้าง<b>แข็งแรง</b> ลักษณะเหล่านี้จึงไม่ได้ซ่อนอยู่เบื้องหลัง แต่แสดงออกมาให้เห็นชัดในแทบทุกสถานการณ์ บางครั้งถึงขั้นล้นออกมาจนกลบเสียงของคนรอบข้างโดยไม่ตั้งใจ จังหวะที่ควรฝึกฝนคือการถอยหนึ่งก้าว เปิดพื้นที่ให้คนอื่นได้พูดบ้าง และหาธาตุที่ช่วยระบายพลังส่วนเกินออกไปอย่างมีทิศทาง แทนที่จะปล่อยให้มันไหลออกมาแบบไม่มีกรอบ",
+  weak: "และเพราะธาตุประจำตัวของคุณค่อนข้าง<b>อ่อนกำลัง</b> ลักษณะเหล่านี้จึงมักหลบอยู่ลึกๆ และแสดงตัวออกมาไม่เต็มที่นักในวันที่ต้องเผชิญแรงกดดัน สิ่งที่ควรทำไม่ใช่การฝืนแบกทุกอย่างไว้คนเดียว แต่คือการหาสภาพแวดล้อมหรือคนที่ช่วยเติมพลังให้ เมื่อมีแรงหนุนที่เหมาะสมเข้ามา ตัวตนที่แท้จริงของคุณจะค่อยๆ ปรากฏออกมาเองโดยไม่ต้องฝืน"
+};
+
+const RELATION_LOVE_TEXT = [
+  "คู่ของคุณมักเป็นคนที่เดินอยู่บนเส้นทางคล้ายกับคุณเอง มองโลกด้วยสายตาแบบเดียวกัน เข้าใจกันได้โดยไม่ต้องอธิบายมาก เหมือนเจอคนที่พูดภาษาเดียวกันมาตั้งแต่แรกพบ แต่ความคล้ายคลึงกันนี้ก็แฝงความเสี่ยงไว้เงียบๆ — เมื่อทั้งสองฝ่ายมีจุดยืนแบบเดียวกันมากเกินไป การแข่งขันกันเองโดยไม่รู้ตัวอาจแทรกเข้ามาแทนที่ความร่วมมือได้ง่ายกว่าที่คิด",
+  "คู่ของคุณมักเป็นคนที่ทำให้คุณกล้าแสดงออกและปลดปล่อยด้านสร้างสรรค์ในตัวเองออกมาได้เต็มที่ ความสัมพันธ์แบบนี้เต็มไปด้วยชีวิตชีวา บทสนทนาไม่มีวันจืดชืด แต่พลังงานที่พลุ่งพล่านตลอดเวลาก็ต้องการจังหวะพักเช่นกัน — หากฝ่ายใดฝ่ายหนึ่งดึงพลังงานของอีกฝ่ายไปใช้มากเกินไปโดยไม่คืนกลับ ความสัมพันธ์อาจเหนื่อยล้าเร็วกว่าที่ทั้งคู่คาดคิด",
+  "คุณมักเป็นฝ่ายที่รับบทนำหรือดูแลในความสัมพันธ์ ดึงดูดคนที่ต้องการทิศทางหรือความมั่นคงจากคุณโดยธรรมชาติ ความรู้สึกได้เป็นที่พึ่งพิงให้ใครสักคนคือสิ่งที่เติมเต็มคุณจริงๆ แต่เส้นบางๆ ระหว่างการดูแลกับการควบคุมนั้นข้ามได้ง่ายกว่าที่คิด — หากปล่อยให้ความห่วงใยกลายเป็นการกำหนดทุกอย่างแทนอีกฝ่าย ความสัมพันธ์อาจอึดอัดขึ้นทีละน้อยโดยที่คุณไม่ทันสังเกต",
+  "ความสัมพันธ์ของคุณมักมาพร้อมความรู้สึกว่าต้องพิสูจน์ตัวเองอยู่เสมอ คู่ของคุณอาจเป็นคนที่มีมาตรฐานสูงหรือมีอิทธิพลต่อทิศทางชีวิตคุณไม่น้อย ซึ่งในแง่หนึ่งก็ผลักดันให้คุณเติบโตเร็วกว่าที่จะทำได้ด้วยตัวเองตามลำพัง แต่ในอีกแง่หนึ่ง หากแรงกดดันนั้นสะสมนานเกินไปโดยไม่มีพื้นที่ให้พักหายใจ ความสัมพันธ์อาจกลายเป็นภาระมากกว่าจะเป็นที่พึ่งพิง",
+  "คู่ของคุณมักเป็นแหล่งพลังงานและกำลังใจที่สำคัญที่สุดแหล่งหนึ่งในชีวิต การอยู่ใกล้กันให้ความรู้สึกมั่นคง เหมือนมีที่พักพิงให้กลับไปได้เสมอไม่ว่าข้างนอกจะวุ่นวายแค่ไหน แต่ความอบอุ่นที่พึ่งพาได้ง่ายนี้ก็อาจทำให้คุณเผลอพึ่งพาฝ่ายเดียวมากเกินไป จนวันหนึ่งลืมไปว่าตัวเองก็ยืนได้ด้วยขาของตัวเองเช่นกัน"
+];
+const PERIOD_TEXT = [
+  "ช่วงสิบปีนี้ ผู้คนที่เข้ามาในชีวิตมักมีนิสัยและวิธีคิดคล้ายคุณมากจนแทบเป็นภาพสะท้อน ความร่วมมือเกิดขึ้นได้ง่ายและเป็นธรรมชาติ เหมาะกับการรวมทีมกับคนที่มองไปทางเดียวกันเพื่อลงมือทำสิ่งที่วางแผนไว้นานแล้ว",
+  "ช่วงสิบปีนี้ ผู้คนที่เข้ามาในชีวิตมักมีพลังงานคล้ายคุณแต่ต่างมุมมอง เหมือนเจอคู่แข่งที่แข็งแกร่งพอๆ กัน ความสัมพันธ์แบบนี้ผลักดันให้คุณพัฒนาตัวเองเร็วขึ้น แต่ก็ต้องระวังการแข่งขันที่แฝงมากับความร่วมมือ",
+  "ช่วงสิบปีนี้ พลังสร้างสรรค์ในตัวคุณไหลออกมาอย่างนุ่มนวลและเป็นธรรมชาติ เหมาะกับงานที่ต้องใช้ความประณีตหรือการดูแลรายละเอียด ผลงานที่ออกมาในช่วงนี้มักได้รับการยอมรับอย่างค่อยเป็นค่อยไปมากกว่าจะโด่งดังทันที",
+  "ช่วงสิบปีนี้ พลังสร้างสรรค์ในตัวคุณแหลมคมและกล้าท้าทายกรอบเดิมมากขึ้น เหมาะกับการเริ่มสิ่งใหม่ที่ไม่มีใครกล้าลอง แต่ก็ควรระวังคำพูดหรือการกระทำที่อาจตรงเกินไปจนกระทบความสัมพันธ์รอบตัว",
+  "ช่วงสิบปีนี้ โอกาสทางการเงินมักมาในรูปแบบที่ไม่คาดคิด เช่น ข้อเสนอที่เข้ามาเอง หรือช่องทางใหม่ที่ไม่ได้วางแผนไว้ล่วงหน้า เหมาะกับการเปิดใจรับโอกาสที่ผ่านเข้ามา แต่ก็ควรมีสติในการประเมินก่อนตัดสินใจทุกครั้ง",
+  "ช่วงสิบปีนี้ ทรัพย์สินและผลตอบแทนมักมาจากความพยายามที่สม่ำเสมอมากกว่าโชคช่วย เป็นจังหวะที่เหมาะกับการบริหารจัดการรายได้ประจำให้เติบโตทีละขั้น มากกว่าจะหวังผลตอบแทนก้อนใหญ่ในเวลาสั้น",
+  "ช่วงสิบปีนี้ ความรับผิดชอบที่เข้ามามักมีโครงสร้างชัดเจน เป็นตำแหน่งหรือบทบาทที่มีกฎเกณฑ์แน่นอนให้ปฏิบัติตาม แม้จะหนักแต่ก็มั่นคง เหมาะกับการสร้างความน่าเชื่อถือในระยะยาวผ่านระบบที่มีอยู่แล้ว",
+  "ช่วงสิบปีนี้ แรงกดดันที่เข้ามามักมาแบบไม่ทันตั้งตัวและท้าทายกว่าปกติ เหมือนถูกทดสอบขีดจำกัดของตัวเองอยู่เรื่อยๆ แต่หากผ่านช่วงนี้ไปได้ มักจะแข็งแกร่งและกล้าตัดสินใจมากขึ้นกว่าเดิมอย่างเห็นได้ชัด",
+  "ช่วงสิบปีนี้ แรงสนับสนุนที่ได้รับมักมาในรูปแบบที่อบอุ่นและตรงไปตรงมา เช่น คำแนะนำจากคนที่ไว้ใจได้ หรือโอกาสในการเรียนรู้ที่เข้ามาอย่างเป็นธรรมชาติ เหมาะกับการเปิดรับความช่วยเหลือโดยไม่ต้องเกรงใจมากเกินไป",
+  "ช่วงสิบปีนี้ แรงสนับสนุนที่ได้รับมักมาในรูปแบบที่ไม่คาดคิด เช่น ความรู้จากแหล่งที่ไม่เป็นทางการ หรือไอเดียที่ผุดขึ้นมาเองโดยไม่มีใครสอน เหมาะกับการเชื่อสัญชาตญาณของตัวเองให้มากขึ้นในช่วงนี้"
+];
+
+/* childhood (below ~18): reframed around family/upbringing rather than career/wealth, since child has no independent work life */
+const PERIOD_TEXT_CHILD = [
+  "ช่วงวัยนี้เอื้อต่อการมีเพื่อนเล่นหรือพี่น้องที่สนิทกันง่าย ครอบแวดล้อมรอบตัวมักมีคนที่นิสัยคล้ายคลึงกันเข้ามาเกี่ยวข้อง เป็นรากฐานที่ดีสำหรับการเรียนรู้เรื่องมิตรภาพและการอยู่ร่วมกับผู้อื่นตั้งแต่วัยเยาว์",
+  "ช่วงวัยนี้ความคิดสร้างสรรค์และพลังในการแสดงออกมักโดดเด่นตั้งแต่เด็ก อาจเห็นแนวโน้มด้านศิลปะ การพูด หรือความอยากรู้อยากลองที่ชัดเจนกว่าเด็กวัยเดียวกัน ผู้ปกครองควรเปิดโอกาสให้ได้ทดลองแสดงออกอย่างเหมาะสม",
+  "ช่วงวัยนี้ครอบครัวมักมีฐานะหรือทรัพยากรที่เอื้อต่อการเลี้ยงดูค่อนข้างดี หรือได้รับการสนับสนุนทางวัตถุอย่างเพียงพอ เป็นรากฐานที่ช่วยให้เติบโตอย่างไม่ขาดแคลนในช่วงวัยที่ยังพึ่งพาผู้ใหญ่",
+  "ช่วงวัยนี้อาจเจอกับระเบียบวินัยหรือความคาดหวังจากพ่อแม่ที่ค่อนข้างสูง เป็นวัยที่ถูกฝึกฝนให้มีกรอบและความรับผิดชอบตั้งแต่เล็ก ซึ่งหล่อหลอมนิสัยที่มั่นคงในระยะยาว แม้บางครั้งอาจรู้สึกกดดันมากกว่าเด็กคนอื่น",
+  "ช่วงวัยนี้มักได้รับความรักความเอาใจใส่จากผู้ใหญ่รอบตัวค่อนข้างมาก ทั้งจากพ่อแม่ ญาติ หรือครูอาจารย์ เป็นวัยที่วางรากฐานด้านความมั่นคงทางใจได้ดี หากได้รับการเลี้ยงดูอย่างเหมาะสม"
+];
+const CHILD_POLARITY_SUFFIX = [
+  " ในช่วงนี้ลักษณะดังกล่าวแสดงออกมาตรงกับตัวตนพื้นฐานของเด็กค่อนข้างชัด ไม่ต้องฝืนปรับตัวมากนัก",
+  " ในช่วงนี้ลักษณะดังกล่าวอาจไม่ตรงกับนิสัยพื้นฐานของเด็กเสียทีเดียว ทำให้ต้องใช้เวลาปรับตัวมากกว่าปกติเล็กน้อย"
+];
+
+/* elder (60+): reframed around health, legacy, and family rather than career ambition */
+const PERIOD_TEXT_ELDER = [
+  "ช่วงวัยนี้ให้ความสำคัญกับเพื่อนฝูงรุ่นราวคราวเดียวกันและกลุ่มสังคมที่คุ้นเคย การได้ใช้เวลากับคนที่เข้าใจกันโดยไม่ต้องอธิบายมาก จะเติมเต็มช่วงบั้นปลายได้ดีกว่าการอยู่ตามลำพัง",
+  "ช่วงวัยนี้เป็นจังหวะที่เหมาะกับการถ่ายทอดความรู้และประสบการณ์ให้คนรุ่นหลัง ไม่ว่าจะเป็นงานอดิเรกที่อยากแบ่งปัน หรือเรื่องราวชีวิตที่อยากบอกเล่า การได้แสดงออกในแบบที่เป็นตัวเองจะทำให้รู้สึกมีคุณค่าอย่างต่อเนื่อง",
+  "ช่วงวัยนี้เกี่ยวพันกับการบริหารจัดการทรัพย์สินที่สะสมมาตลอดชีวิตให้เกิดประโยชน์สูงสุด มากกว่าจะแสวงหาทรัพย์ใหม่ ควรวางแผนเรื่องมรดกหรือการส่งต่อทรัพยากรอย่างรอบคอบในช่วงนี้",
+  "ช่วงวัยนี้อาจยังมีภาระหรือความรับผิดชอบบางอย่างที่ต้องดูแล ไม่ว่าจะเป็นเรื่องสุขภาพของตัวเองหรือคนใกล้ตัว เป็นช่วงที่ควรให้ความสำคัญกับการพักผ่อนและไม่แบกภาระเกินกำลังมากกว่าวัยอื่น",
+  "ช่วงวัยนี้แรงสนับสนุนจากลูกหลานหรือคนใกล้ชิดมีความสำคัญเป็นพิเศษ การได้รับการดูแลเอาใจใส่จะช่วยให้ช่วงบั้นปลายเป็นไปอย่างสงบและอบอุ่น เป็นวัยที่ควรเปิดใจรับความช่วยเหลือมากกว่าพยายามทำทุกอย่างด้วยตัวเองเหมือนวัยหนุ่มสาว"
+];
+const ELDER_POLARITY_SUFFIX = [
+  " ช่วงนี้พลังงานด้านนี้สอดคล้องกับจังหวะชีวิตที่ผ่านมาค่อนข้างมาก ทำให้ปรับตัวรับได้ไม่ยาก",
+  " ช่วงนี้พลังงานด้านนี้อาจต่างจากจังหวะที่คุ้นเคยมาตลอดชีวิตอยู่บ้าง จึงควรค่อยๆ ปรับตัวโดยไม่ต้องเร่งรีบ"
+];
+
+function periodTextFor(startAge, tenGodIdx){
+  const rel = Math.floor(tenGodIdx/2);
+  const polarity = tenGodIdx%2; // 0=same, 1=opposite
+  if(startAge < 18) return PERIOD_TEXT_CHILD[rel] + CHILD_POLARITY_SUFFIX[polarity];
+  if(startAge >= 60) return PERIOD_TEXT_ELDER[rel] + ELDER_POLARITY_SUFFIX[polarity];
+  return PERIOD_TEXT[tenGodIdx];
+}
+
+const LEVEL_LABEL = { high:"โดดเด่น", mid:"ปานกลาง", low:"ควรเสริม" };
+
+const CAREER_TEXT = {
+  high: e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณโดดเด่นอย่างชัดเจน นี่คือธาตุที่ผูกกับตำแหน่งหน้าที่และความรับผิดชอบโดยตรง คุณจึงมักถูกมองเห็นและได้รับความไว้วางใจให้ดูแลเรื่องสำคัญเร็วกว่าคนรุ่นเดียวกัน เหมาะกับบทบาทที่ต้องตัดสินใจแทนคนอื่นหรือรับผิดชอบทีมทั้งทีม สิ่งที่ควรระวังคือภาระที่ค่อยๆ พอกพูนจนไม่เหลือเวลาให้ตัวเอง — ความน่าเชื่อถือที่สร้างมาจะยั่งยืนกว่า ถ้ารู้จักปฏิเสธงานที่เกินกำลังบ้าง`,
+  mid:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณอยู่ในระดับสมดุล ไม่มากไม่น้อยเกินไป คุณรับผิดชอบงานได้ดีโดยไม่รู้สึกกดดันจนเกินไป และมักได้รับความไว้วางใจแบบค่อยเป็นค่อยไปทีละขั้นตามผลงานที่พิสูจน์ให้เห็น เส้นทางสายนี้อาจดูไม่หวือหวา แต่มั่นคงและต่อยอดได้ในระยะยาว`,
+  low:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณค่อนข้างเบาบาง ซึ่งอาจทำให้บางครั้งคุณรู้สึกขาดแรงผลักดันด้านโครงสร้างหรือกรอบเวลาที่ชัดเจน งานที่ปล่อยให้อิสระเกินไปอาจทำให้เสียจังหวะโดยไม่รู้ตัว การหาสภาพแวดล้อมที่มีระบบชัดเจน หรือมีที่ปรึกษาที่ช่วยกำหนดทิศทางให้ จะช่วยเติมเต็มจุดนี้ได้ดีกว่าการฝืนสร้างวินัยขึ้นมาเองล้วนๆ`
+};
+const WEALTH_TEXT = {
+  high: e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณโดดเด่นอย่างชัดเจน นี่คือธาตุแห่งทรัพย์ คุณจึงมีสายตาที่มองเห็นโอกาสทางการเงินได้ไวกว่าคนทั่วไป และกล้าตัดสินใจเรื่องเงินโดยไม่ลังเลนาน เมื่อโอกาสมาคุณมักไม่พลาดที่จะคว้าไว้ สิ่งที่ควรระวังคือความเร็วนั้นเอง — การตัดสินใจไวเกินไปโดยไม่ประเมินความเสี่ยงให้รอบคอบ อาจทำให้พลาดพลั้งได้ง่ายพอๆ กับที่คว้าโอกาสได้ไว`,
+  mid:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณอยู่ในระดับสมดุล การเงินของคุณมักไม่ผันผวนรุนแรงไปทางใดทางหนึ่ง เหมาะกับการวางแผนออมและลงทุนระยะยาวที่ค่อยๆ เติบโต มากกว่าการเก็งกำไรระยะสั้นที่ต้องอาศัยจังหวะแม่นยำ`,
+  low:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณค่อนข้างเบาบาง ซึ่งอาจทำให้บางครั้งคุณมองข้ามโอกาสทางการเงินไปโดยไม่ตั้งใจ เพราะเรื่องเงินไม่ใช่สิ่งที่อยู่ในความสนใจอันดับต้นตามธรรมชาติของคุณ การตั้งเป้าหมายทางการเงินที่ชัดเจนเป็นตัวเลข จะช่วยดึงความสนใจกลับมาที่จุดนี้ได้ดีกว่าการปล่อยให้ผ่านไปตามอารมณ์`
+};
+const FORTUNE_TEXT = {
+  high: e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณโดดเด่นอย่างชัดเจน นี่คือธาตุแห่งแรงสนับสนุนและสติปัญญา คุณมักได้รับความช่วยเหลือจากคนรอบข้างหรือโอกาสที่เข้ามาโดยไม่ได้คาดหวัง เรียนรู้สิ่งใหม่ได้ไวและซึมซับความรู้ได้ลึกกว่าคนทั่วไป สิ่งที่ควรระวังคือการเผลอพึ่งพาโชคหรือแรงหนุนจากภายนอกมากเกินไป จนลืมว่าฝีมือของตัวเองก็สำคัญไม่แพ้กัน`,
+  mid:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณอยู่ในระดับสมดุล แรงสนับสนุนที่ได้รับมักมาพร้อมกับความพยายามของตัวเองในสัดส่วนที่พอเหมาะ ไม่มีอะไรได้มาฟรีๆ แต่ก็ไม่ต้องดิ้นรนคนเดียวจนเกินไปเช่นกัน`,
+  low:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณค่อนข้างเบาบาง ซึ่งอาจทำให้รู้สึกว่าต้องพึ่งพาตัวเองเป็นหลักในแทบทุกเรื่อง การสร้างเครือข่ายคนที่ไว้ใจได้ หรือหาที่ปรึกษาที่มีประสบการณ์มากกว่า จะช่วยเติมเต็มช่องว่างตรงนี้ได้ดีกว่าการพยายามรู้ทุกอย่างด้วยตัวเองคนเดียว`
+};
+
+/* career path — suitable fields/directions, based on Day Master element */
+const CAREER_PATH_TEXT = [
+  "สายงานที่เกี่ยวกับการเติบโต การวางแผนระยะยาว และการสร้างสิ่งใหม่จากศูนย์มักเหมาะกับคุณเป็นพิเศษ — เช่น งานด้านการศึกษา การพัฒนาองค์กร งานวางกลยุทธ์ งานเกี่ยวกับต้นไม้/สิ่งแวดล้อม หรือธุรกิจที่ต้องบ่มเพาะไอเดียให้เติบโตทีละขั้น คุณจะรู้สึกมีพลังเป็นพิเศษเมื่อได้เห็นสิ่งที่ปลูกไว้ค่อยๆ ผลิดอกออกผล มากกว่าการทำงานที่เห็นผลทันทีแต่ไม่มีความต่อเนื่อง",
+  "สายงานที่ต้องแสดงออก สื่อสาร หรือสร้างแรงบันดาลใจให้คนอื่นมักเหมาะกับคุณเป็นพิเศษ — เช่น งานด้านการตลาด สื่อบันเทิง การขาย การพูดในที่สาธารณะ หรืองานสร้างสรรค์ที่ต้องอาศัยพลังงานและความกล้าแสดงออก คุณเปล่งประกายได้ดีที่สุดในบทบาทที่อยู่หน้าเวที ไม่ใช่หลังฉาก",
+  "สายงานที่ต้องการความน่าเชื่อถือ ความสม่ำเสมอ และการดูแลผู้อื่นมักเหมาะกับคุณเป็นพิเศษ — เช่น งานด้านอสังหาริมทรัพย์ การเงินการธนาคาร งานบริหารทรัพยากร งานบริการที่ต้องอาศัยความไว้ใจระยะยาว หรือบทบาทที่ปรึกษาที่คนอื่นพึ่งพาได้ คุณเหมาะกับงานที่ค่อยๆ สร้างชื่อเสียงจากความสม่ำเสมอ มากกว่างานที่ต้องเปลี่ยนทิศทางบ่อยๆ",
+  "สายงานที่ต้องการความแม่นยำ วินัย และหลักการที่ชัดเจนมักเหมาะกับคุณเป็นพิเศษ — เช่น งานด้านกฎหมาย วิศวกรรม การเงินเชิงตัวเลข งานตรวจสอบคุณภาพ หรือบทบาทที่ต้องตัดสินใจอย่างเด็ดขาดภายใต้กรอบกฎเกณฑ์ที่ชัดเจน คุณทำงานได้ดีที่สุดในระบบที่มีมาตรฐานแน่นอน มากกว่าสภาพแวดล้อมที่คลุมเครือไม่มีทิศทาง",
+  "สายงานที่ต้องการความยืดหยุ่น ไหวพริบ และมุมมองที่หลากหลายมักเหมาะกับคุณเป็นพิเศษ — เช่น งานด้านสื่อสารมวลชน การท่องเที่ยว การวิจัย งานที่ต้องเจรจาต่อรอง หรือบทบาทที่ต้องปรับตัวเข้ากับสถานการณ์ใหม่อยู่ตลอดเวลา คุณเก่งเรื่องการหาทางออกที่คนอื่นมองไม่เห็น มากกว่าการทำงานซ้ำเดิมตามรูปแบบตายตัว"
+];
+
+/* health — organ system per Traditional Chinese Medicine element mapping, framed as self-care awareness */
+const HEALTH_TEXT_BASE = [
+  "ในศาสตร์แพทย์แผนจีน ธาตุไม้เชื่อมโยงกับตับและระบบเอ็น/ข้อต่อ ธาตุนี้ไวต่อความเครียดสะสมและอารมณ์ที่อั้นไว้โดยไม่ได้ระบาย",
+  "ในศาสตร์แพทย์แผนจีน ธาตุไฟเชื่อมโยงกับหัวใจและระบบไหลเวียนโลหิต ธาตุนี้ไวต่อความเหนื่อยล้าจากการใช้พลังงานเกินตัวและการพักผ่อนไม่เพียงพอ",
+  "ในศาสตร์แพทย์แผนจีน ธาตุดินเชื่อมโยงกับม้ามและระบบย่อยอาหาร ธาตุนี้ไวต่อความกังวลสะสมและพฤติกรรมการกินที่ไม่สม่ำเสมอ",
+  "ในศาสตร์แพทย์แผนจีน ธาตุทองเชื่อมโยงกับปอดและระบบทางเดินหายใจ ธาตุนี้ไวต่อความเศร้าที่เก็บกดไว้และสภาพแวดล้อมที่มีมลภาวะ",
+  "ในศาสตร์แพทย์แผนจีน ธาตุน้ำเชื่อมโยงกับไตและระบบกระดูก/ฮอร์โมน ธาตุนี้ไวต่อความหวาดกลัวสะสมและการพักผ่อนที่ไม่เพียงพอในระยะยาว"
+];
+const HEALTH_LEVEL_NOTE = {
+  high: e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณค่อนข้างมาก ซึ่งไม่ได้แปลว่าอวัยวะที่เกี่ยวข้องอ่อนแอ แต่อาจหมายถึงระบบนี้ทำงานหนักกว่าธาตุอื่นในชีวิตประจำวัน ควรหมั่นสังเกตสัญญาณเตือนของร่างกายในจุดนี้เป็นพิเศษ และหาจังหวะพักให้ระบบนี้ได้ผ่อนคลายบ้าง`,
+  mid:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณอยู่ในระดับสมดุล ระบบที่เกี่ยวข้องไม่ได้อยู่ในภาวะตึงหรือขาดเป็นพิเศษ การรักษาสมดุลที่มีอยู่ด้วยกิจวัตรที่สม่ำเสมอน่าจะเพียงพอ`,
+  low:  e=>`พลังธาตุ${ELEM_NAME[e]}ในผังของคุณค่อนข้างเบาบาง ตามหลักธาตุให้คุณ นี่คือจุดที่ควรให้ความสำคัญเป็นพิเศษ — การดูแลระบบนี้เชิงป้องกันไว้ก่อน มักได้ผลดีกว่าการรอให้มีอาการแล้วค่อยแก้ไข`
+};
+
+function levelOf(counts, targetElem, totalWeight){
+  const avg = totalWeight/5;
+  const v = counts[targetElem];
+  if(v >= avg*1.4) return 'high';
+  if(v <= avg*0.6) return 'low';
+  return 'mid';
+}
+
+/* ============ Daily Fortune Calendar ============ */
+/* 六合 six-harmony pairs (compatible branch) */
+const BRANCH_HARMONY = [1,0,11,10,9,8,7,6,5,4,3,2];
+/* 六沖 six-clash (opposite branch, always +6 mod 12) — computed inline as mod(branch+6,12) */
+
+const CAT_WORK   = [10,-10,10,15,20,25,15,-15,10,0];
+const CAT_LUCK   = [15,-5,25,10,25,20,-10,-15,20,20];
+const CAT_HEALTH = [15,-5,15,-10,-10,20,-20,-35,25,10];
+const CAT_LOVE   = [8,-12,22,-7,-3,23,-5,-35,25,-10];
+
+function clampScore(v){ return Math.max(5, Math.min(95, v)); }
+function qualityClass(score){ if(score>=62) return 'good'; if(score<=44) return 'low'; return 'mid'; }
+
+function dayGanzhi(y,m,d){
+  const j = jdn(y,m,d);
+  return { stem: mod(j+9,10), branch: mod(j+1,12) };
+}
+
+function dayQuality(dmStem, dmElem, dayStem, dayBranch){
+  const dayStemElem = STEM_ELEM[dayStem];
+  const idx = tenGodIndex(dmStem, dmElem, dayStem, dayStemElem);
+  const bars = {
+    work:   clampScore(50 + CAT_WORK[idx]),
+    luck:   clampScore(50 + CAT_LUCK[idx]),
+    health: clampScore(50 + CAT_HEALTH[idx]),
+    love:   clampScore(50 + CAT_LOVE[idx])
+  };
+  /* overall is derived FROM the bars (not a separate independent score) so the calendar
+     cell color always agrees with what the detail panel shows underneath it */
+  const overall = Math.round((bars.work + bars.luck + bars.health + bars.love) / 4);
+  return {
+    overall, bars, idx,
+    luckyElem: generatorOf(dayStemElem),
+    avoidElem: controllerOf(dayStemElem),
+    goodAnimal: BRANCH_HARMONY[dayBranch],
+    badAnimal: mod(dayBranch+6,12),
+    dayStem, dayBranch
+  };
+}
+
+/* ---------- Universal day quality: 十二建除 (Twelve Day Officers) ----------
+   Traditional almanac system, independent of any individual's birth chart —
+   assigns one of 12 "officers" to each day based on how the day branch relates
+   to the branch of the current solar month. */
+const OFFICER_NAMES = ["建","除","满","平","定","执","破","危","成","收","开","闭"];
+const OFFICER_TH = ["เจี้ยน · สร้าง","ฉู · ขจัด","หมั่น · เต็ม","ผิง · สมดุล","ติ้ง · มั่นคง","จื๋อ · ลงมือ","พอ · แตกหัก","เหวย · เสี่ยง","เฉิง · สำเร็จ","โซว · เก็บเกี่ยว","ไค · เปิด","ปี้ · ปิด"];
+const OFFICER_GOOD = [1,2,4,8,9,10];
+const OFFICER_BAD  = [6,11];
+function officerTier(idx){
+  if(OFFICER_GOOD.includes(idx)) return 'good';
+  if(OFFICER_BAD.includes(idx)) return 'low';
+  return 'mid';
+}
+function dayOfficerIndex(y,m,d){
+  const mBr = monthBranch(y,m,d);
+  const dBr = dayGanzhi(y,m,d).branch;
+  return mod(dBr - mBr, 12);
+}
+function universalScore(idx){
+  const tier = officerTier(idx);
+  const base = tier==='good' ? 74 : (tier==='low' ? 26 : 50);
+  const variance = mod(idx*7, 21) - 10;
+  return clampScore(base + variance);
+}
+
+/* short daily-flavor reason text, keyed by ten-god index (0-9) — distinct from the decade-scale PERIOD_TEXT */
+const DAILY_REASON = [
+  "วันนี้พลังงานเข้ากับตัวคุณแบบตรงไปตรงมา เหมาะกับการนัดเจอเพื่อน ทำงานร่วมกับคนอื่น หรือขอความร่วมมือจากทีม",
+  "วันนี้พลังงานคล้ายคุณแต่มีมุมที่ต่างกันอยู่ อาจเจอการถกเถียงหรือแข่งขันได้ง่ายกว่าปกติ ควรระวังการปะทะกับคนใกล้ตัว",
+  "วันนี้เหมาะกับงานที่ต้องใช้ความคิดสร้างสรรค์แบบนุ่มนวล เช่น งานออกแบบ งานเขียน หรือพูดคุยอธิบายสิ่งต่างๆ",
+  "วันนี้ความคิดของคุณแหลมคมและกล้าพูดตรงกว่าปกติ เหมาะกับการเสนอไอเดียใหม่ แต่ควรระวังคำพูดที่อาจแรงเกินไป",
+  "วันนี้เหมาะกับการเจรจาเรื่องเงิน ลงทุน หรือรับข้อเสนอที่เข้ามาแบบไม่คาดคิด แต่ควรมีสติก่อนตัดสินใจทุกครั้ง",
+  "วันนี้เหมาะกับการจัดการเรื่องการเงินที่ทำอยู่แล้วให้เป็นระบบมากขึ้น มากกว่าจะเริ่มการลงทุนใหม่",
+  "วันนี้เหมาะกับงานที่ต้องมีระเบียบ กฎเกณฑ์ หรือความรับผิดชอบชัดเจน เช่น เซ็นสัญญา ประชุมงานสำคัญ",
+  "วันนี้อาจเจอแรงกดดันหรือความท้าทายที่ไม่ทันตั้งตัว ควรเลี่ยงการตัดสินใจใหญ่ และเน้นความรอบคอบเป็นพิเศษ",
+  "วันนี้เหมาะกับการเรียนรู้สิ่งใหม่ ขอคำแนะนำจากคนที่ไว้ใจ หรือพักผ่อนเติมพลังให้ตัวเอง",
+  "วันนี้เหมาะกับการเชื่อสัญชาตญาณตัวเอง ลองสิ่งที่ไม่มีใครสอนมาก่อน หรือหาความรู้จากแหล่งที่ไม่เป็นทางการ"
+];
+const CAT_LABELS = { work:'งาน/เงิน', luck:'โชคลาภ', health:'สุขภาพ', love:'ความรัก' };
+function daySummary(bars){
+  const entries = Object.entries(bars).sort((a,b)=>b[1]-a[1]);
+  const best = entries.filter(e=>e[1]>=62).map(e=>CAT_LABELS[e[0]]);
+  const worst = entries.filter(e=>e[1]<=44).map(e=>CAT_LABELS[e[0]]);
+  let s = '';
+  if(best.length) s += `วันนี้เหมาะเป็นพิเศษกับเรื่อง${best.join(' และ ')}`;
+  if(worst.length) s += (s? ' ส่วน':'วันนี้') + `ควรระวังเรื่อง${worst.join(' และ ')}`;
+  if(!best.length && !worst.length) s = 'วันนี้ไม่มีหมวดไหนโดดเด่นเป็นพิเศษ เป็นวันธรรมดาที่ทำอะไรตามปกติได้';
+  return s;
+}
+
+/* ============ UI wiring ============ */
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+themeToggleBtn.onclick = ()=>{ document.body.classList.toggle('light-mode'); };
+
+const monthSel = document.getElementById('monthInput');
+const daySel = document.getElementById('dayInput');
+const yearInput = document.getElementById('yearInput');
+const hourSel = document.getElementById('hourInput');
+const minSel = document.getElementById('minuteInput');
+const unknownTime = document.getElementById('unknownTime');
+const timeFields = document.getElementById('timeFields');
+const errBox = document.getElementById('errBox');
+const btnCE = document.getElementById('btnCE');
+const btnBE = document.getElementById('btnBE');
+
+const MONTH_TH = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+MONTH_TH.forEach((mn,i)=>{ const o=document.createElement('option'); o.value=i+1; o.textContent=mn; monthSel.appendChild(o); });
+for(let hh=0; hh<24; hh++){ const o=document.createElement('option'); o.value=hh; o.textContent=hh; hourSel.appendChild(o); }
+for(let mm=0; mm<60; mm++){ const o=document.createElement('option'); o.value=mm; o.textContent=String(mm).padStart(2,'0'); minSel.appendChild(o); }
+
+let eraIsBE = false;
+btnCE.onclick=()=>{ eraIsBE=false; btnCE.classList.add('active'); btnBE.classList.remove('active'); };
+btnBE.onclick=()=>{ eraIsBE=true; btnBE.classList.add('active'); btnCE.classList.remove('active'); };
+
+let genderMale = null;
+const btnMale = document.getElementById('btnMale');
+const btnFemale = document.getElementById('btnFemale');
+btnMale.onclick=()=>{ genderMale=true; btnMale.classList.add('active'); btnFemale.classList.remove('active'); };
+btnFemale.onclick=()=>{ genderMale=false; btnFemale.classList.add('active'); btnMale.classList.remove('active'); };
+
+function daysInMonth(y,m){
+  if(m===2) return isLeap(y)?29:28;
+  return [31,28,31,30,31,30,31,31,30,31,30,31][m-1];
+}
+function rebuildDays(){
+  const y = parseInt(yearInput.value)|| 2000;
+  const m = parseInt(monthSel.value)||1;
+  const cur = parseInt(daySel.value)||1;
+  daySel.innerHTML='';
+  const dim = daysInMonth(y,m);
+  for(let dd=1; dd<=dim; dd++){ const o=document.createElement('option'); o.value=dd; o.textContent=dd; daySel.appendChild(o); }
+  daySel.value = Math.min(cur,dim);
+}
+monthSel.onchange=rebuildDays; yearInput.oninput=rebuildDays; rebuildDays();
+monthSel.value=1; daySel.value=1;
+
+unknownTime.onchange=()=>{ timeFields.classList.toggle('hidden', unknownTime.checked); };
+
+document.getElementById('calcBtn').onclick = onCalculate;
+
+function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; }
+function clearErr(){ errBox.style.display='none'; }
+
+function onCalculate(){
+  clearErr();
+  let y = parseInt(yearInput.value);
+  if(!y){ showErr('กรุณาใส่ปีเกิด'); return; }
+  if(eraIsBE) y = y - 543;
+  const m = parseInt(monthSel.value);
+  const d = parseInt(daySel.value);
+  if(y < JIE_START || y > JIE_END){
+    showErr(`ตอนนี้รองรับข้อมูลปี ค.ศ. ${JIE_START}–${JIE_END} เท่านั้น (ปีที่กรอก: ${y})`);
+    return;
+  }
+  const hasTime = !unknownTime.checked;
+  const h = hasTime ? parseInt(hourSel.value) : null;
+  const mi = hasTime ? parseInt(minSel.value) : null;
+
+  const result = calcBazi(y,m,d,h,mi,hasTime);
+  renderResult(result, hasTime, {y,m,d,genderMale});
+
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function pillarCard(label, stem, branch, isDayMaster){
+  const stemEl = STEM_ELEM[stem], branchEl = BRANCH_ELEM[branch];
+  const div = document.createElement('div');
+  div.className = 'pillar' + (isDayMaster?' daymaster':'');
+  div.innerHTML = `
+    ${isDayMaster?'<div class="dm-badge">Day Master</div>':''}
+    <div class="plabel">${label}</div>
+    <div class="glyphs">
+      <div class="glyph" style="background:${ELEM_COLOR[stemEl]};color:${ELEM_TEXTC[stemEl]};border-color:transparent;">${STEMS[stem]}</div>
+      <div class="glyph" style="background:${ELEM_COLOR[branchEl]};color:${ELEM_TEXTC[branchEl]};border-color:transparent;">${BRANCHES[branch]}</div>
+    </div>
+    <div class="pname"><b>${STEM_TH[stem]}${BRANCH_TH[branch].split(' ')[0]}</b><br>${ELEM_NAME[stemEl]}/${ELEM_NAME[branchEl]} · ${BRANCH_TH[branch]}</div>
+  `;
+  return div;
+}
+
+let STATE = null;
+
+function renderResult(r, hasTime, birth){
+  const grid = document.getElementById('pillarsGrid');
+  grid.innerHTML='';
+  grid.appendChild(pillarCard('ปี · Year', r.year.stem, r.year.branch, false));
+  grid.appendChild(pillarCard('เดือน · Month', r.month.stem, r.month.branch, false));
+  grid.appendChild(pillarCard('วัน · Day', r.day.stem, r.day.branch, true));
+  if(hasTime){
+    grid.appendChild(pillarCard('เวลา · Hour', r.hour.stem, r.hour.branch, false));
+  }
+  document.getElementById('unknownNote').style.display = hasTime ? 'none':'block';
+
+  /* ---- element weighting ---- */
+  const counts=[0,0,0,0,0];
+  function add(elem, w){ counts[elem]+=w; }
+  add(STEM_ELEM[r.year.stem],1); add(BRANCH_ELEM[r.year.branch],1);
+  add(STEM_ELEM[r.month.stem],1); add(BRANCH_ELEM[r.month.branch],2); // season weighted x2
+  add(BRANCH_ELEM[r.day.branch],1);
+  if(hasTime){ add(STEM_ELEM[r.hour.stem],1); add(BRANCH_ELEM[r.hour.branch],1); }
+  const totalWeight = counts.reduce((a,b)=>a+b,0);
+
+  const dmElem = STEM_ELEM[r.day.stem];
+  const supportElems = [dmElem, generatorOf(dmElem)];
+  const supportWeight = supportElems.reduce((s,e)=>s+counts[e],0);
+  const isStrong = supportWeight >= totalWeight/2;
+
+  /* Day master circle */
+  const dmSummary = document.getElementById('dmSummary');
+  dmSummary.innerHTML = `
+    <div class="dm-circle" style="border-color:${ELEM_COLOR[dmElem]}; background:radial-gradient(circle, ${ELEM_COLOR[dmElem]}22, transparent 70%);">
+      <div class="el-char" style="color:${ELEM_COLOR[dmElem]}">${ELEM_CHAR[dmElem]}</div>
+      <div class="el-name">${ELEM_NAME[dmElem]} · ${(r.day.stem%2===0)?'หยาง':'หยิน'}</div>
+    </div>
+    <div class="dm-text">
+      <div class="strength">ธาตุ${ELEM_NAME[dmElem]}ของคุณ <b>${isStrong?'"แข็ง"':'"อ่อน"'}</b></div>
+      <p>${isStrong
+        ? `ในผังดวงมีธาตุที่เสริม${ELEM_NAME[dmElem]}อยู่มาก (${supportWeight}/${totalWeight} ส่วน) — Day Master ค่อนข้างแข็งแรง ควรหาธาตุมาระบาย/ถ่วงสมดุล`
+        : `ในผังดวงมีธาตุที่เสริม${ELEM_NAME[dmElem]}ค่อนข้างน้อย (${supportWeight}/${totalWeight} ส่วน) — Day Master ค่อนข้างอ่อน ควรหาธาตุมาเสริมกำลัง`}</p>
+    </div>
+  `;
+
+  /* balance bar */
+  const bar = document.getElementById('balanceBar');
+  bar.innerHTML='';
+  counts.forEach((c,i)=>{
+    if(c<=0) return;
+    const seg=document.createElement('div');
+    seg.style.width = (c/totalWeight*100)+'%';
+    seg.style.background = ELEM_COLOR[i];
+    bar.appendChild(seg);
+  });
+  const legend = document.getElementById('balanceLegend');
+  legend.innerHTML='';
+  ELEM_NAME.forEach((n,i)=>{
+    const s=document.createElement('span');
+    s.innerHTML = `<i style="background:${ELEM_COLOR[i]}"></i>${n} ${counts[i]}`;
+    legend.appendChild(s);
+  });
+
+  /* useful god */
+  const useful = document.getElementById('usefulWrap');
+  let els, note;
+  if(isStrong){
+    els = [drainOf(dmElem), wealthOf(dmElem)];
+    note = ['ธาตุที่ระบายพลังของ Day Master ออก (食傷) ช่วยให้คุณแสดงออก สร้างสรรค์ ไม่อั้นพลังไว้มากเกินไป',
+            'ธาตุที่ Day Master ควบคุมอยู่ (財) เป็นธาตุแห่งทรัพย์—เพิ่มพลังงานด้านนี้ช่วยดึงโอกาส/ทรัพย์เข้ามา'];
+  } else {
+    els = [generatorOf(dmElem), dmElem];
+    note = ['ธาตุที่ป้อนพลังให้ Day Master โดยตรง (印) ช่วยเสริมความมั่นคง สติปัญญา และแรงหนุน',
+            'ธาตุเดียวกับ Day Master (比劫) ช่วยเสริมความแข็งแรง กำลังใจ และพันธมิตร'];
+  }
+  useful.innerHTML='';
+  els.forEach((e,i)=>{
+    const p=document.createElement('div');
+    p.className='useful-pill';
+    p.innerHTML = `
+      <div class="uhead">
+        <div class="udot" style="background:${ELEM_COLOR[e]}"></div>
+        <div class="uname">${ELEM_NAME[e]} ${ELEM_CHAR[e]}</div>
+      </div>
+      <p>${note[i]}<br><br><b style="color:var(--cream); opacity:.85;">${ELEM_TIP[e]}</b></p>
+    `;
+    useful.appendChild(p);
+  });
+
+  /* save state for interactive explorer */
+  const kuaYear = baziYear(birth.y, birth.m, birth.d);
+  const kua = (birth.genderMale!==null) ? calcKua(kuaYear, birth.genderMale) : null;
+  STATE = { r, hasTime, birth, counts, totalWeight, dmElem, dmStem: r.day.stem, isStrong, kua };
+
+  /* build/refresh the topic explorer */
+  buildTopicExplorer();
+
+  /* render the always-visible Kua Number / direction card */
+  renderDirectionPanel();
+
+  /* init/refresh daily fortune calendar to current month */
+  const todayNow = new Date();
+  CAL_STATE = { year: todayNow.getFullYear(), month: todayNow.getMonth()+1 };
+  renderCalendarGrid();
+}
+
+/* ============ Interactive explorer (topics + reading panel + decade strip) ============ */
+const TOPICS = [
+  {key:'personality', label:'บุคลิกภาพ'},
+  {key:'love',        label:'ความรัก'},
+  {key:'career',      label:'การงาน'},
+  {key:'careerPath',  label:'อาชีพที่เหมาะ'},
+  {key:'wealth',       label:'การเงิน'},
+  {key:'fortune',      label:'โชคลาภ'},
+  {key:'health',       label:'สุขภาพ'},
+  {key:'decades',      label:'ช่วงชีวิต'}
+];
+
+function buildTopicExplorer(){
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML='';
+  TOPICS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='topic-btn';
+    b.textContent=t.label;
+    b.onclick=()=>selectTopic(t.key, b);
+    grid.appendChild(b);
+  });
+  document.getElementById('readingPanel').classList.remove('show');
+  document.getElementById('decadeStrip').classList.remove('show');
+  document.getElementById('decadeStrip').innerHTML='';
+  document.getElementById('decadeCaption').style.display='none';
+}
+
+function selectTopic(key, btnEl){
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  const panel = document.getElementById('readingPanel');
+  const strip = document.getElementById('decadeStrip');
+  strip.classList.remove('show');
+  strip.innerHTML='';
+  document.getElementById('decadeCaption').style.display='none';
+
+  const {r, counts, totalWeight, dmElem, isStrong} = STATE;
+
+  if(key==='personality'){
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[dmElem]}"></div><div class="rp-title">ธาตุ${ELEM_NAME[dmElem]} — ตัวตนของคุณ</div></div>
+      <p>${PERSONALITY_CORE[dmElem]} ${isStrong ? STRENGTH_NOTE.strong.replace(/<\/?b>/g,'') : STRENGTH_NOTE.weak.replace(/<\/?b>/g,'')}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='love'){
+    const dayBranchElem = BRANCH_ELEM[r.day.branch];
+    const rel = relationOf(dmElem, dayBranchElem);
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[dayBranchElem]}"></div><div class="rp-title">ความรัก — วังคู่ครอง</div></div>
+      <p>${RELATION_LOVE_TEXT[rel]}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='career'){
+    const target = controllerOf(dmElem);
+    const lvl = levelOf(counts, target, totalWeight);
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[target]}"></div><div class="rp-title">การงาน</div><div class="rp-level">${LEVEL_LABEL[lvl]}</div></div>
+      <p>${CAREER_TEXT[lvl](target)}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='careerPath'){
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[dmElem]}"></div><div class="rp-title">อาชีพที่เหมาะ — ธาตุ${ELEM_NAME[dmElem]}</div></div>
+      <p>${CAREER_PATH_TEXT[dmElem]}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='wealth'){
+    const target = wealthOf(dmElem);
+    const lvl = levelOf(counts, target, totalWeight);
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[target]}"></div><div class="rp-title">การเงิน</div><div class="rp-level">${LEVEL_LABEL[lvl]}</div></div>
+      <p>${WEALTH_TEXT[lvl](target)}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='fortune'){
+    const target = generatorOf(dmElem);
+    const lvl = levelOf(counts, target, totalWeight);
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[target]}"></div><div class="rp-title">โชคลาภ</div><div class="rp-level">${LEVEL_LABEL[lvl]}</div></div>
+      <p>${FORTUNE_TEXT[lvl](target)}</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='health'){
+    const dmLvl = levelOf(counts, dmElem, totalWeight);
+    let weakElem = 0;
+    for(let i=1;i<5;i++){ if(counts[i] < counts[weakElem]) weakElem = i; }
+    let html = `
+      <div class="rp-head"><div class="rp-dot" style="background:${ELEM_COLOR[dmElem]}"></div><div class="rp-title">สุขภาพ — ธาตุ${ELEM_NAME[dmElem]}</div></div>
+      <p>${HEALTH_TEXT_BASE[dmElem]} ${HEALTH_LEVEL_NOTE[dmLvl](dmElem)}</p>
+    `;
+    if(weakElem !== dmElem && counts[weakElem] < totalWeight/5*0.6){
+      html += `<p style="margin-top:14px;">${HEALTH_TEXT_BASE[weakElem]} ${HEALTH_LEVEL_NOTE['low'](weakElem)}</p>`;
+    }
+    panel.innerHTML = html;
+    panel.classList.add('show');
+    return;
+  }
+
+  if(key==='decades'){
+    renderDecades();
+    return;
+  }
+}
+
+function renderDirectionPanel(){
+  const panel = document.getElementById('directionPanel');
+  const { kua, birth } = STATE;
+
+  if(kua===null){
+    panel.innerHTML = `<p style="font-size:13px; color:var(--cream); opacity:.7;">การคำนวณทิศมงคลต้องใช้เพศ — กรุณาเลือกเพศในฟอร์มด้านบนแล้วกดคำนวณดวงอีกครั้ง</p>`;
+    return;
+  }
+
+  const t = KUA_TABLE[kua];
+  const groupTH = t.group==='East' ? 'กลุ่มตะวันออก (East Group)' : 'กลุ่มตะวันตก (West Group)';
+
+  const goodList = [
+    {label:'ความสำเร็จ/ทรัพย์', th:DIR_TH[t.success]},
+    {label:'สุขภาพ', th:DIR_TH[t.health]},
+    {label:'ความสัมพันธ์', th:DIR_TH[t.love]},
+    {label:'ความมั่นคง', th:DIR_TH[t.growth]}
+  ];
+  const badList = [
+    {label:'โชคร้าย', th:DIR_TH[t.badluck]},
+    {label:'ห้าผี', th:DIR_TH[t.fiveghosts]},
+    {label:'หกอาวุธ', th:DIR_TH[t.sixkilling]},
+    {label:'สูญเสียทั้งหมด', th:DIR_TH[t.totalloss]}
+  ];
+
+  panel.innerHTML = `
+    <p style="font-size:13.5px; line-height:1.85; color:var(--cream); opacity:.8; margin:0 0 4px;">
+      เลขกวย้า (命卦) ของคุณคือ <b style="color:var(--pink);">${kua}</b> — ${groupTH}<br>
+      คำนวณจากปีเกิด (นับตามหลัก立春) และเพศ ใช้บอกทิศที่เหมาะกับการวางโต๊ะทำงาน หันเตียงนอน หรือเลือกทำเลบ้าน/ออฟฟิศ เป็นค่าคงที่ตลอดชีวิต ไม่เปลี่ยนรายวัน
+    </p>
+    <div class="dir-grid">
+      <div class="dir-col">
+        <div class="dir-col-head good">ทิศมงคล</div>
+        ${goodList.map(x=>`<div class="dir-row"><span class="dir-name">${x.label}</span><span class="dir-val">${x.th}</span></div>`).join('')}
+      </div>
+      <div class="dir-col">
+        <div class="dir-col-head bad">ทิศควรเลี่ยง</div>
+        ${badList.map(x=>`<div class="dir-row"><span class="dir-name">${x.label}</span><span class="dir-val">${x.th}</span></div>`).join('')}
+      </div>
+    </div>
+  `;
+  panel.classList.add('show');
+}
+
+function renderDecades(){
+  const panel = document.getElementById('readingPanel');
+  const strip = document.getElementById('decadeStrip');
+  const {r, birth, dmElem} = STATE;
+
+  if(birth.genderMale===null){
+    panel.innerHTML = `
+      <div class="rp-head"><div class="rp-title">ช่วงชีวิต (ดวง 10 ปี)</div></div>
+      <p>การคำนวณช่วงชีวิตต้องใช้ทิศทางเดินดวงซึ่งอิงจากเพศ — กรุณาเลือกเพศในฟอร์มด้านบนแล้วกดคำนวณดวงอีกครั้ง</p>
+    `;
+    panel.classList.add('show');
+    return;
+  }
+
+  const { forward, startAge, pillars } = buildLuckPillars(birth.y, birth.m, birth.d, r.month.stem, r.month.branch, r.year.stem, birth.genderMale, 10);
+
+  const today = new Date();
+  let currentAge = today.getFullYear() - birth.y;
+  const hasHadBirthdayThisYear = (today.getMonth()+1 > birth.m) || (today.getMonth()+1===birth.m && today.getDate()>=birth.d);
+  if(!hasHadBirthdayThisYear) currentAge -= 1;
+
+  strip.innerHTML='';
+  let currentChipEl = null;
+  pillars.forEach((p,i)=>{
+    const stemEl = STEM_ELEM[p.stem], branchEl = BRANCH_ELEM[p.branch];
+    const isCurrent = currentAge >= p.startAge && currentAge < p.endAge;
+    const isPast = p.endAge <= currentAge;
+    const chip=document.createElement('div');
+    chip.className='decade-chip' + (isCurrent?' current':'') + (isPast?' past':'');
+    chip.innerHTML = `
+      <div class="dc-age">${Math.round(p.startAge)}–${Math.round(p.startAge)+9}</div>
+      <div class="dc-glyph" style="color:${ELEM_COLOR[stemEl]}">${STEMS[p.stem]}</div>
+      <div class="dc-glyph" style="color:${ELEM_COLOR[branchEl]}">${BRANCHES[p.branch]}</div>
+    `;
+    chip.onclick=()=>renderDecadeReading(p, i, isCurrent);
+    strip.appendChild(chip);
+    if(isCurrent) currentChipEl = chip;
+  });
+  strip.classList.add('show');
+
+  const caption = document.getElementById('decadeCaption');
+  caption.textContent = `นับจากวันเกิดถึงวันตัดฤดูกาลที่ใกล้ที่สุด ด้วยหลัก 3 วัน = 1 ปี — ดวงแรกของคุณจึงเริ่มที่อายุ ${startAge.toFixed(1)} ปี ไม่ใช่ 0 ปีพอดี แต่ละช่วงถัดไปจึงขยับตามเศษนี้ไปเรื่อยๆ ไม่ใช่เลขกลมทุก 10 ปี ช่วงที่จางกว่าคือช่วงที่ผ่านไปแล้ว`;
+  caption.style.display='block';
+
+  /* scroll so current+future dominate the visible strip on first view */
+  if(currentChipEl){
+    requestAnimationFrame(()=>{
+      strip.scrollLeft = Math.max(0, currentChipEl.offsetLeft - 14);
+    });
+  }
+
+  STATE.decadePillars = pillars;
+  STATE.decadeCurrentAge = currentAge;
+
+  const firstIdx = pillars.findIndex(p=> currentAge >= p.startAge && currentAge < p.endAge);
+  const showIdx = firstIdx>=0 ? firstIdx : 0;
+  renderDecadeReading(pillars[showIdx], showIdx, firstIdx>=0);
+
+  document.querySelectorAll('.decade-chip').forEach((c,i)=>{ c.classList.toggle('active', i===showIdx); });
+}
+
+function renderDecadeReading(p, idx, isCurrent){
+  const panel = document.getElementById('readingPanel');
+  const {dmElem, dmStem, decadePillars, decadeCurrentAge} = STATE;
+  const stemEl = STEM_ELEM[p.stem];
+  const tgIdx = tenGodIndex(dmStem, dmElem, p.stem, stemEl);
+
+  document.querySelectorAll('.decade-chip').forEach((c,i)=>{ c.classList.toggle('active', i===idx); });
+
+  const hasPrev = idx > 0;
+  const hasNext = decadePillars && idx < decadePillars.length-1;
+
+  const displayStart = Math.round(p.startAge);
+  const displayEnd = displayStart + 9;
+
+  panel.innerHTML = `
+    <div class="rp-head">
+      <div class="rp-dot" style="background:${ELEM_COLOR[stemEl]}"></div>
+      <div class="rp-title">ช่วงอายุ ${displayStart}–${displayEnd} ปี</div>
+      ${isCurrent ? '<div class="rp-level">ช่วงปัจจุบัน</div>' : ''}
+    </div>
+    <p>${periodTextFor(p.startAge, tgIdx)}</p>
+    <div class="decade-nav">
+      <button type="button" class="decade-nav-btn" id="decadePrevBtn" ${hasPrev?'':'disabled'}>◀ ย้อนกลับ</button>
+      <button type="button" class="decade-nav-btn" id="decadeNextBtn" ${hasNext?'':'disabled'}>ถัดไป ▶</button>
+    </div>
+  `;
+  panel.classList.add('show');
+
+  if(hasPrev){
+    document.getElementById('decadePrevBtn').onclick = ()=>{
+      const np = decadePillars[idx-1];
+      const npIsCurrent = decadeCurrentAge >= np.startAge && decadeCurrentAge < np.endAge;
+      renderDecadeReading(np, idx-1, npIsCurrent);
+    };
+  }
+  if(hasNext){
+    document.getElementById('decadeNextBtn').onclick = ()=>{
+      const np = decadePillars[idx+1];
+      const npIsCurrent = decadeCurrentAge >= np.startAge && decadeCurrentAge < np.endAge;
+      renderDecadeReading(np, idx+1, npIsCurrent);
+    };
+  }
+}
+
+/* ---------- Calendar UI ---------- */
+let CAL_STATE = null;
+
+function firstWeekdayOfMonth(y,m){ return new Date(y,m-1,1).getDay(); }
+
+function barRow(name,val){
+  return `<div class="cd-bar-row"><div class="cd-bar-name">${name}</div><div class="cd-bar-track"><div class="cd-bar-fill" style="width:${val}%"></div></div></div>`;
+}
+
+function renderCalendarGrid(){
+  if(!STATE || !CAL_STATE) return;
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  label.textContent = `${MONTH_TH[CAL_STATE.month-1]} ${CAL_STATE.year+543}`;
+
+  grid.innerHTML='';
+  const fw = firstWeekdayOfMonth(CAL_STATE.year, CAL_STATE.month);
+  const dim = daysInMonth(CAL_STATE.year, CAL_STATE.month);
+  for(let i=0;i<fw;i++){ const c=document.createElement('div'); c.className='cal-cell empty'; grid.appendChild(c); }
+
+  const today = new Date();
+  const isCurMonth = (today.getFullYear()===CAL_STATE.year && today.getMonth()+1===CAL_STATE.month);
+  const { dmStem, dmElem } = STATE;
+
+  for(let d=1; d<=dim; d++){
+    const dg = dayGanzhi(CAL_STATE.year, CAL_STATE.month, d);
+    const q = dayQuality(dmStem, dmElem, dg.stem, dg.branch);
+    const cls = qualityClass(q.overall);
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell q-' + cls + (isCurMonth && d===today.getDate() ? ' today':'');
+    cell.innerHTML = `${d}<div class="cq-dot ${cls}"></div>`;
+    cell.onclick = ()=> selectCalDay(CAL_STATE.year, CAL_STATE.month, d, cell);
+    grid.appendChild(cell);
+  }
+  document.getElementById('calDetail').style.display='none';
+}
+
+function gaugeHtml(title, iconSvg, score, sublabel){
+  const cls = qualityClass(score);
+  const label = {good:'ดี', mid:'ปานกลาง', low:'ควรระวัง'}[cls];
+  const color = cls==='good' ? '#8fd19e' : (cls==='low' ? '#e08a8a' : 'var(--lav)');
+  return `
+    <div class="gauge">
+      <div class="gauge-title">${iconSvg}${title}</div>
+      <div class="gauge-circle" style="--pct:${score}; --gauge-color:${color};">
+        <div class="gauge-inner"><div class="gauge-score">${score}<span>/100</span></div></div>
+      </div>
+      <div class="gauge-label">${label}<br><span style="opacity:.6;font-size:11px;">${sublabel}</span></div>
+    </div>
+  `;
+}
+const ICON_GLOBE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>`;
+const ICON_PERSON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>`;
+
+function selectCalDay(y,m,d,cellEl){
+  document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
+  cellEl.classList.add('selected');
+  const { dmStem, dmElem } = STATE;
+  const dg = dayGanzhi(y,m,d);
+  const q = dayQuality(dmStem, dmElem, dg.stem, dg.branch);
+  const cls = qualityClass(q.overall);
+  const clsLabel = {good:'ดี', mid:'ปานกลาง', low:'ควรระวัง'}[cls];
+
+  const officerIdx = dayOfficerIndex(y,m,d);
+  const uniScore = universalScore(officerIdx);
+
+  const detail = document.getElementById('calDetail');
+  detail.innerHTML = `
+    <div class="gauge-wrap">
+      ${gaugeHtml('สากล', ICON_GLOBE, uniScore, 'คุณภาพวัน')}
+      ${gaugeHtml('เฉพาะบุคคล', ICON_PERSON, q.overall, 'ความสอดคล้อง')}
+    </div>
+    <div class="gauge-caption">สากล = วันนี้ดีแค่ไหนโดยทั่วไป (${OFFICER_TH[officerIdx]}) · เฉพาะบุคคล = ดวงคุณเข้ากับวันนี้แค่ไหน</div>
+    <div class="cd-label" style="text-align:center; margin-bottom:16px;">${d} ${MONTH_TH[m-1]} ${y+543} · ${STEMS[q.dayStem]}${BRANCHES[q.dayBranch]} · ${clsLabel}</div>
+    <p class="cd-reason">${DAILY_REASON[q.idx]} <b>${daySummary(q.bars)}</b></p>
+    <div class="cd-bars">
+      ${barRow('งาน/เงิน', q.bars.work)}
+      ${barRow('โชคลาภ', q.bars.luck)}
+      ${barRow('สุขภาพ', q.bars.health)}
+      ${barRow('ความรัก', q.bars.love)}
+    </div>
+    <div class="cd-grid2">
+      <div class="cd-tile"><div class="cd-tile-label">สีมงคล</div><div class="cd-tile-value"><span class="cd-swatch" style="background:${ELEM_REAL_COLOR[q.luckyElem]}"></span>${elemColorLabel(q.luckyElem)}</div></div>
+      <div class="cd-tile"><div class="cd-tile-label">สีควรเลี่ยง</div><div class="cd-tile-value"><span class="cd-swatch" style="background:${ELEM_REAL_COLOR[q.avoidElem]}"></span>${elemColorLabel(q.avoidElem)}</div></div>
+      <div class="cd-tile"><div class="cd-tile-label">นักษัตรถูกโฉลก</div><div class="cd-tile-value">${BRANCH_TH[q.goodAnimal]}</div></div>
+      <div class="cd-tile"><div class="cd-tile-label">นักษัตรควรเลี่ยง</div><div class="cd-tile-value">${BRANCH_TH[q.badAnimal]}</div></div>
+    </div>
+  `;
+  detail.style.display='block';
+}
+
+document.getElementById('calPrevBtn').onclick = ()=>{
+  if(!CAL_STATE) return;
+  CAL_STATE.month--; if(CAL_STATE.month<1){ CAL_STATE.month=12; CAL_STATE.year--; }
+  renderCalendarGrid();
+};
+document.getElementById('calNextBtn').onclick = ()=>{
+  if(!CAL_STATE) return;
+  CAL_STATE.month++; if(CAL_STATE.month>12){ CAL_STATE.month=1; CAL_STATE.year++; }
+  renderCalendarGrid();
+};
+
+/* ambient stars */
+(function(){
+  const box = document.getElementById('stars');
+  for(let i=0;i<50;i++){
+    const s=document.createElement('span');
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.width = s.style.height = (Math.random()<0.15 ? 3:2)+'px';
+    box.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
